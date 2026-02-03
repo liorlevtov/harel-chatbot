@@ -22,7 +22,7 @@ ENV/
 
 # Data directories (large files)
 data/
-data_prepared/
+#data_prepared/
 
 # Milvus persistent storage
 milvus_data/
