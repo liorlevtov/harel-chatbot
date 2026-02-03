@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Data directories (large files)
+data/
+data_prepared/
+
+# Milvus persistent storage
+milvus_data/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
