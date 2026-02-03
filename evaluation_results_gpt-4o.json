@@ -1,0 +1,142 @@
+[
+    {
+        "type": "דירה",
+        "prompt": "עבור ביטוח דירה, האם יש כיסוי למקרה נזק של מחשב נייד?",
+        "generated_response": "אני לא יודע.\n",
+        "reference_response": "לא",
+        "similarity_score": 0.4671084841490717
+    },
+    {
+        "type": "דירה",
+        "prompt": "האם הרחבת ביטוח הדירה שתכלול כיסוי על נזק לצמחים והשקייה דורשת תשלום נוסף?",
+        "generated_response": "הרחבת ביטוח הדירה שכוללת כיסוי לצמחים ומשאות ומערכות השקיה ניתנת ללא תשלום נוסף בפוליסת \"אדירה כסף\" של הראל ([harel-group.co.il](https://www.harel-group.co.il/insurance/apartment/policies/pages/adira-silver.aspx?utm_source=openai))\n",
+        "reference_response": "לא",
+        "similarity_score": 0.23962725851027578
+    },
+    {
+        "type": "דירה",
+        "prompt": "מתי דירה נחשבת לא תפוסה?",
+        "generated_response": "על פי אתר הראל, דירה נחשבת לא תפוסה אם היא אינה מאוכלסת במשך תקופה של 60 ימים רצופים לפחות. [מקור](https://www.harel-group.co.il/insurance/home/Pages/home-insurance.aspx)\n",
+        "reference_response": "דירה הפנויה למעלה מ-60 ימים רצופים, או שבפועל לא התגוררו בה באופן סדיר למעלה מ-60 ימים רצופים נחשבת לא תפוסה.",
+        "similarity_score": 0.612965910189333
+    },
+    {
+        "type": "דירה",
+        "prompt": "האם הביטוח מכסה נזק לדירה שנגרם כתוצאה מפגיעת ברק?",
+        "generated_response": "אני לא יודע.\n",
+        "reference_response": "כן",
+        "similarity_score": 0.47171156222292304
+    },
+    {
+        "type": "דירה",
+        "prompt": "האם הביטוח מכסה מקרה של גניבת אופניים חשמליים שהיו נעולים מחוץ לדירה המבוטחת?",
+        "generated_response": "לא – על פי מידע באתר הראל, כיסוי גניבה קיים לתכולת הדירה ואינו כולל מקרים בהם אופניים (כולל חשמליים) נגנבים כאשר הם נעולים מחוץ לדירה, אלא אם נרכש כיסוי נוסף מסוג \"כל הסיכונים\" שמכסה חפצים יקרי ערך גם כשהם מחוץ לדירה ([harel-group.co.il](https://www.harel-group.co.il/insurance/apartment/policies/pages/adira-silver.aspx?utm_source=openai))\n",
+        "reference_response": "לא, רק עבור אופניים ללא מנוע עזר",
+        "similarity_score": 0.3919781300816816
+    },
+    {
+        "type": "דירה",
+        "prompt": "יש לי ביטוח דירה, ועל הגג ישנו דוד שמש בנפח 300 ליטר. נגרם נזק לאחרונה, האם אני מכוסה על הנזק במקרה הזה?",
+        "generated_response": "אני לא יודע.\n",
+        "reference_response": "לא, הביטוח לא חל על דוד שנפחו מעל 200 ליטר",
+        "similarity_score": 0.3715509905946569
+    },
+    {
+        "type": "דירה",
+        "prompt": "אני מבוטח אצלכם בביטוח דירה, והחלה רטיבות בתקרה שנגרמת כנראה ממי גשמים שנספגים בה. אני זכאי לכיסוי על מקרה כזה?",
+        "generated_response": "אני לא יודע.\n",
+        "reference_response": "לא",
+        "similarity_score": 0.46720276279794465
+    },
+    {
+        "type": "עסקים",
+        "prompt": "מהי תקופת ההתיישנות של תביעה לתגמולי ביטוח?",
+        "generated_response": "אני לא יודע.\n",
+        "reference_response": "שלוש שנים מיום קרות מקרה הביטוח.",
+        "similarity_score": 0.38426828725879736
+    },
+    {
+        "type": "עסקים",
+        "prompt": "אני מבוטח אצלכם בפוליסה לביטוח אבדן רישיון רופא, והתחילו נגדי תהליכים משפטיים לשלילת הרשיון – האם הביטוח מכסה את ההוצאות המשפטיות?",
+        "generated_response": "אני לא יודע.\n",
+        "reference_response": "כן",
+        "similarity_score": 0.4720853857297405
+    },
+    {
+        "type": "עסקים",
+        "prompt": "מהו מספר הטלפון של מוקד תביעות ביטוח כללי של הראל?",
+        "generated_response": "מספר הטלפון של מוקד תביעות ביטוח כללי של הראל הוא 03‑9294000 , לפי פירוט מוקדי השירות באתר עמיתים הון (סוכנות ביטוח), המציג רשימת מוקדים של הראל כולל מוקד תביעות ביטוח כללי.([amitim-hon.co.il](https://amitim-hon.co.il/%D7%A8%D7%A9%D7%99%D7%9E%D7%AA-%D7%9E%D7%95%D7%A7%D7%93%D7%99-%D7%A9%D7%99%D7%A8%D7%95%D7%AA-%D7%91%D7%94%D7%A8%D7%90%D7%9C/?utm_source=openai))\n",
+        "reference_response": "03-9294000",
+        "similarity_score": 0.4158510412146103
+    },
+    {
+        "type": "עסקים",
+        "prompt": "אני מבוטח אצלכם בפוליסת מכלול לחבר מושב, האם אני מכוסה במקרה של נזק כתוצאה משקיעת קרקע בשטח החקלאי?",
+        "generated_response": "אני לא יודע.\n",
+        "reference_response": "לא",
+        "similarity_score": 0.46720276279794465
+    },
+    {
+        "type": "עסקים",
+        "prompt": "אני מבוטח בפוליסת מכלול למושב. יש בשטח שלי מבנה שעשוי מלוחות אסבסט, האם הוא נחשב \"מבנה מסיבי\"?",
+        "generated_response": "אני לא יודע.\n",
+        "reference_response": "כן",
+        "similarity_score": 0.4720853857297405
+    },
+    {
+        "type": "רכב",
+        "prompt": "אני מבוטח בהראל בפוליסה לביטוח צ.מ.ה. מכלי דלק שברשותי ניזוקו וכל הדלק שהיה בהם נזל ואבד, האם אני מכוסה על מחיר הדלק שאבד?",
+        "generated_response": "אני לא יודע.\n",
+        "reference_response": "לא",
+        "similarity_score": 0.46720201125559013
+    },
+    {
+        "type": "רכב",
+        "prompt": "מהי תקופת ההתיישנות של תביעה מכוח פוליסת ביטוח \"תו סוחר\" - רכב חובה?",
+        "generated_response": "אני לא יודע.\n",
+        "reference_response": "שבע שנים",
+        "similarity_score": 0.3869349617484223
+    },
+    {
+        "type": "רכב",
+        "prompt": "אני מבוטח בהראל בפוליסה לביטוח צ.מ.ה. השתמשתי במנוע של כלי מבוטח כדי להפעיל את המצבר של רכב אחר של העסק שלי, ונגרם נזק לכלי המבוטח. האם אני זכאי לכיסוי על הנזק במקרה כזה?",
+        "generated_response": "אני לא יודע.\n",
+        "reference_response": "לא",
+        "similarity_score": 0.46720276279794465
+    },
+    {
+        "type": "בריאות",
+        "prompt": "מה המחיר ההשתתפות העצמית של טיפול רופא בביקור בית?",
+        "generated_response": "מחיר ההשתתפות העצמית עבור ביקור רופא לבית במסגרת ביטוח בריאות של הראל עומד על 25 ₪ בלבד ([harel-group.co.il](https://www.harel-group.co.il/Insurance/health/services/Pages/home-visiting-doctor.aspx?utm_source=openai))\n",
+        "reference_response": "25 שקלים",
+        "similarity_score": 0.44275427614248325
+    },
+    {
+        "type": "בריאות",
+        "prompt": "אני מנוי ברפואה אישית און ליין פלוס - מה המחיר ההשתתפות העצמית של ייעוץ פסיכולוגי מקוון?",
+        "generated_response": "ההשתתפות העצמית עבור ייעוץ פסיכולוגי מקוון במסגרת כתב השירות \"רפואה אישית Online+\" של הראל היא 100 ש\"ח לייעוץ, ועד ל‑3 ייעוצים פסיכולוגיים בשנה ביטוחית ([harel-group.co.il](https://www.harel-group.co.il/insurance/health/policies/pages/services/personalized-medicine-online.aspx?utm_source=openai))\n",
+        "reference_response": "100 שקל לכל ייעוץ",
+        "similarity_score": 0.6169007136996831
+    },
+    {
+        "type": "בריאות",
+        "prompt": "בני מבוטח אצלכם בתוכנית ביטוח לניתוחים וטיפולים מחליפי ניתוח בישראל – שקל ראשון. הוא בן 14, מהי עלות הביטוח החודשית עבורו?",
+        "generated_response": "אני לא יודע.\n",
+        "reference_response": "38.27 שקלים לחודש",
+        "similarity_score": 0.33993574831292284
+    },
+    {
+        "type": "נסיעות",
+        "prompt": "אני בן 23 וטס לשנה וחצי של טיול בארצות הברית, האם אוכל להיות מבוטח אצלכם בתוכנית דרכון FIRST CLASS לכל אורך התקופה?",
+        "generated_response": "סליחה, אני לא יודע.\n",
+        "reference_response": "לא, יש מגבלה של עד 365 ימים",
+        "similarity_score": 0.42571261134485305
+    },
+    {
+        "type": "נסיעות",
+        "prompt": "אני בן 31 וטס בקרוב להודו, אני מתכנן לקנות ביטוח אצלכם בתוכנית דרכון FIRST CLASS. מה יהיה התעריף היומי של הפוליסה הבסיסית אצלכם?",
+        "generated_response": "אני מצטער, אבל לא מצאתי באתר הראל מידע לגבי תעריף יומי לתוכנית \"דרכון First Class\".\n",
+        "reference_response": "2.2 דולר ליום",
+        "similarity_score": 0.4501398656649044
+    }
+]
