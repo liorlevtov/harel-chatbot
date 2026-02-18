@@ -44,3 +44,15 @@ DOMAINS = [
     "apartment",
     "general",
 ]
+
+DOMAINS_HEB = {
+    "car": "רכב",
+    "life": "חיים",
+    "travel": "נסיעות",
+    "health": "בריאות",
+    "dental": "שיניים",
+    "mortgage": "משכנתא",
+    "business": "עסקים",
+    "apartment": "דירה",
+    "general": "כללי",
+}
