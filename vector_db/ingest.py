@@ -156,10 +156,10 @@ def run_ingestion(fresh_start: bool = False):
     try:
         connect()
     except Exception as e:
-        print(f"\nError: Could not connect to Milvus at localhost:19530")
-        print("Make sure Milvus is running: make milvus-start")
-        print(f"Details: {e}")
-        sys.exit(1)
+        raise ConnectionError(
+            f"Could not connect to Milvus at localhost:19530. "
+            f"Make sure Milvus is running (make milvus-start). Details: {e}"
+        ) from e
 
     if fresh_start:
         print("Dropping existing collection...")
@@ -240,7 +240,8 @@ def run_ingestion(fresh_start: bool = False):
     print(f"Collection entities: {stats['num_entities']}")
     print("=" * 60)
 
-    disconnect()
+    # disconnect()
+    return collection
 
 
 def main():
