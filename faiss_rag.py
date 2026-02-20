@@ -150,6 +150,7 @@ def ingest(force: bool = False) -> None:
         print(f"Index already exists at {FAISS_INDEX_PATH} – skipping (use force=True to rebuild).")
         return
 
+    print("Starting ingestion process...")
     embeddings = _make_embeddings()
     all_docs: list[Document] = []
 
@@ -189,7 +190,6 @@ def load_vectorstore() -> FAISS:
 # ---------------------------------------------------------------------------
 
 def query(
-    question: str,
     top_k: int = DEFAULT_TOP_K,
 ) -> dict:
     """
@@ -219,15 +219,18 @@ def query(
         return_source_documents=True,
     )
 
-    result = chain.invoke({"query": question})
-    answer = result.get("result", "").strip()
-    source_docs = result.get("source_documents", [])
-    sources = list({doc.metadata.get("filename", "") for doc in source_docs})
+    while True:
+        question = input("\nEnter your question (or 'exit' to quit): ").strip()
+        if question.lower() in ["exit", "quit"]:
+            break
 
-    return {
-        "answer": answer,
-        "sources": sources,
-    }
+        result = chain.invoke({"query": question})
+        answer = result.get("result", "").strip()
+        source_docs = result.get("source_documents", [])
+        sources = list({doc.metadata.get("filename", "") for doc in source_docs})
+        print(f"\nAnswer:\n{answer}")
+        print(f"Sources: {', '.join(sources) or 'none'}")
+    return 
 
 
 # ---------------------------------------------------------------------------
@@ -236,14 +239,9 @@ def query(
 
 if __name__ == "__main__":
 
-    question = "מה זה ביטוח דירה?"
-
     ingest()
     print("\nFAISS index is ready. You can now query it using the 'query' function.\n")
-    out = query(question)
-    print(f"Sources: {', '.join(out['sources']) or 'none'}")
-    print(f"\nAnswer :\n{out['answer']}")
-    
+    query()
     exit(0)
 
 
