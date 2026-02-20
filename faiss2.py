@@ -19,7 +19,7 @@ RAG_HEB_TEMPLATE = """אתה עוזר וירטואלי של קבוצת ביטו�
 
 
 PROJECT_ROOT = Path(__file__).parent
-DATA_PREPARED_DIR = PROJECT_ROOT / "data_prepared" / 'car'
+DATA_PREPARED_DIR = PROJECT_ROOT / "data_prepared" 
 FAISS_INDEX_PATH = PROJECT_ROOT / "faiss_index"
 
 
