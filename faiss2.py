@@ -55,7 +55,7 @@ Rules:
 - Return ONLY valid JSON. No markdown, no explanation outside the JSON.
 """
 
-TOP_K = 5
+TOP_K = 7
 
 
 
@@ -146,16 +146,40 @@ def _hybrid_retrieve(retrievers, query: str) -> list:
 
     for rank, doc in enumerate(bm25_docs):
         key = hash(doc.page_content)
-        scores[key] = scores.get(key, 0) + 0.4 / (RRF_K + rank + 1)
+        scores[key] = scores.get(key, 0) + 0.3 / (RRF_K + rank + 1)
         doc_map[key] = doc
 
     for rank, doc in enumerate(faiss_docs):
         key = hash(doc.page_content)
-        scores[key] = scores.get(key, 0) + 0.6 / (RRF_K + rank + 1)
+        scores[key] = scores.get(key, 0) + 0.7 / (RRF_K + rank + 1)
         doc_map[key] = doc
 
     ranked = sorted(scores.keys(), key=lambda k: scores[k], reverse=True)
     return [doc_map[k] for k in ranked[:TOP_K]]
+
+
+OUTDATED_YEARS = [str(y) for y in range(2013, 2022)]
+
+
+def _is_outdated(filename: str) -> bool:
+    if filename.startswith("archive_"):
+        return True
+    return any(year in filename for year in OUTDATED_YEARS)
+
+
+def _load_all_docs() -> list:
+    """Load and split all current markdown docs from data_prepared. No embeddings needed."""
+    docs = []
+    for root, _, files in os.walk(DATA_PREPARED_DIR):
+        for file in files:
+            if file.endswith(".md") and not _is_outdated(file):
+                path = os.path.join(root, file)
+                try:
+                    docs.append(TextLoader(path, encoding="utf-8").load()[0])
+                except Exception:
+                    pass
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200, add_start_index=True)
+    return text_splitter.split_documents(docs)
 
 
 def create_or_load_faiss_index():
@@ -180,24 +204,22 @@ def create_or_load_faiss_index():
                 cached_docs = pickle.load(f)
             _retriever = _build_ensemble(cached_docs)
         else:
-            print("No docs cache found — using FAISS-only retrieval. Rebuild the index to enable hybrid search.")
-            faiss_ret = vector_store.as_retriever(search_kwargs={"k": TOP_K})
-            _retriever = (None, faiss_ret)
+            print("No docs cache — building BM25 from data_prepared (no embedding needed)...")
+            all_splits = _load_all_docs()
+            print(f"Loaded {len(all_splits)} chunks for BM25.")
+            # Save docs cache so next load is instant
+            with open(DOCS_CACHE_PATH, "wb") as f:
+                pickle.dump(all_splits, f)
+            print(f"Docs cache saved to {DOCS_CACHE_PATH}")
+            _retriever = _build_ensemble(all_splits)
 
     else:
         docs = []
 
-        OUTDATED_YEARS = [str(y) for y in range(2013, 2022)]
-
-        def is_outdated(filename: str) -> bool:
-            if filename.startswith("archive_"):
-                return True
-            return any(year in filename for year in OUTDATED_YEARS)
-
         for root, _, files in os.walk(DATA_PREPARED_DIR):
             for file in files:
                 if file.endswith(".md"):
-                    if is_outdated(file):
+                    if _is_outdated(file):
                         print(f"Skipping outdated file: {file}".encode("utf-8", errors="replace").decode("ascii", errors="replace"))
                         continue
                     print(f"Loading document: {file}".encode("utf-8", errors="replace").decode("ascii", errors="replace"))

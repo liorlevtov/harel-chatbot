@@ -279,7 +279,7 @@ def main(label: str = RUN_LABEL):
         domain    = case["type"]
         qtype     = classify_question_type(question)
 
-        print(f"[{i+1}/{len(test_cases)}] {domain}: {question[:60]}...")
+        print(f"[{i+1}/{len(test_cases)}] {domain}: {question[:60]}...".encode("utf-8", errors="replace").decode("ascii", errors="replace"))
 
         t0 = time.time()
         generated = answer_question(question)   # exact same function as the chatbot
