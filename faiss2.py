@@ -81,10 +81,22 @@ def create_or_load_faiss_index():
     else:
         docs = []
 
+        OUTDATED_START_YEAR = 2013
+        OUTDATED_END_YEAR = 2022
+        OUTDATED_YEARS = [str(y) for y in range(OUTDATED_START_YEAR, OUTDATED_END_YEAR)]
+
+        def is_outdated(filename: str) -> bool:
+            if filename.startswith("archive_"):
+                return True
+            return any(year in filename for year in OUTDATED_YEARS)
+
         for root, _, files in os.walk(DATA_PREPARED_DIR):
             for file in files:
                 if file.endswith(".md"):
-                    print(f"Loading document: {file}")
+                    if is_outdated(file):
+                        print(f"Skipping outdated file: {file}".encode("utf-8", errors="replace").decode("ascii", errors="replace"))
+                        continue
+                    print(f"Loading document: {file}".encode("utf-8", errors="replace").decode("ascii", errors="replace"))
                     path = os.path.join(root, file)
 
                     loader = TextLoader(path, encoding="utf-8")
