@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>הראל ביטוח - צ'אטבוט</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", "Arial", sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      direction: rtl;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #c8102e 0%, #a50d26 100%);
+      color: #fff;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+      flex-shrink: 0;
+    }
+    .logo-circle {
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,.2);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; font-weight: 700;
+    }
+    .header-text .title { font-size: 1.25rem; font-weight: 700; }
+    .header-text .subtitle { font-size: .8rem; opacity: .8; }
+
+    /* Chat window */
+    #chat-window {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      scroll-behavior: smooth;
+    }
+
+    /* Welcome */
+    #welcome {
+      text-align: center;
+      color: #888;
+      margin: auto;
+      padding: 32px 16px;
+    }
+    #welcome h2 { font-size: 1.3rem; margin-bottom: 8px; color: #444; }
+    #welcome p { font-size: .9rem; line-height: 1.6; }
+
+    /* Bubble rows */
+    .bubble-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      animation: fadeIn .3s ease;
+    }
+    .bubble-row.user { flex-direction: row-reverse; }
+    .bubble-row.bot { flex-direction: row; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Avatars */
+    .avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .9rem;
+      flex-shrink: 0;
+      font-weight: 600;
+    }
+    .bubble-row.user .avatar { background: #c8102e; color: #fff; }
+    .bubble-row.bot .avatar { background: #e0e0e0; color: #555; }
+
+    /* Bubbles */
+    .bubble {
+      max-width: min(75%, 580px);
+      padding: 12px 16px;
+      border-radius: 18px;
+      line-height: 1.7;
+      font-size: .93rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .bubble-row.user .bubble {
+      background: #c8102e;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .bubble-row.bot .bubble {
+      background: #fff;
+      color: #1a1a1a;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.1);
+    }
+    .bubble.error {
+      background: #fff3f3;
+      color: #c0392b;
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Source block */
+    .source-block {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: #f7f8fa;
+      border-right: 3px solid #c8102e;
+      border-radius: 4px;
+      font-size: .8rem;
+      color: #555;
+      white-space: normal;
+    }
+    .source-block strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #333;
+    }
+    .source-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .source-list li {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .source-list .source-icon {
+      flex-shrink: 0;
+      font-size: .75rem;
+    }
+    .source-list a {
+      color: #c8102e;
+      text-decoration: none;
+      word-break: break-all;
+      direction: ltr;
+      unicode-bidi: embed;
+    }
+    .source-list a:hover { text-decoration: underline; }
+
+    /* Typing indicator */
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 14px 18px;
+      background: #fff;
+      border-radius: 18px;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.1);
+      width: fit-content;
+    }
+    .typing-indicator span {
+      width: 8px; height: 8px;
+      background: #bbb;
+      border-radius: 50%;
+      display: inline-block;
+      animation: bounce 1.2s infinite ease-in-out;
+    }
+    .typing-indicator span:nth-child(2) { animation-delay: .2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: .4s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-6px); }
+    }
+
+    /* Input area */
+    #input-area {
+      background: #fff;
+      border-top: 1px solid #e0e0e0;
+      padding: 12px 16px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      flex-shrink: 0;
+    }
+    #user-input {
+      flex: 1;
+      border: 1.5px solid #d0d0d0;
+      border-radius: 22px;
+      padding: 10px 16px;
+      font-size: .93rem;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      direction: rtl;
+      max-height: 120px;
+      line-height: 1.5;
+      transition: border-color .2s;
+    }
+    #user-input:focus { border-color: #c8102e; }
+    #user-input:disabled { background: #f5f5f5; }
+
+    #send-btn {
+      background: #c8102e;
+      border: none;
+      border-radius: 50%;
+      width: 44px; height: 44px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background .2s, opacity .2s;
+    }
+    #send-btn:hover:not(:disabled) { background: #a50d26; }
+    #send-btn:disabled { opacity: .4; cursor: not-allowed; }
+    #send-btn svg { fill: #fff; width: 20px; height: 20px; transform: scaleX(-1); }
+
+    .input-hint {
+      text-align: center;
+      font-size: .72rem;
+      color: #aaa;
+      padding: 4px 0 2px;
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-circle">ה</div>
+  <div class="header-text">
+    <div class="title">הראל ביטוח</div>
+    <div class="subtitle">עוזר וירטואלי מבוסס AI</div>
+  </div>
+</header>
+
+<div id="chat-window">
+  <div id="welcome">
+    <h2>שלום! אני הצ'אטבוט של הראל ביטוח</h2>
+    <p>שאל אותי כל שאלה בנוגע לביטוחים, פוליסות ומוצרי הראל.</p>
+  </div>
+</div>
+
+<div id="input-area">
+  <button id="send-btn" aria-label="שלח" disabled>
+    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+  </button>
+  <textarea id="user-input" rows="1" placeholder="שאל שאלה על ביטוחי הראל..." aria-label="שאלה"></textarea>
+</div>
+<div class="input-hint">Enter לשליחה &middot; Shift+Enter לשורה חדשה</div>
+
+<script>
+  const chatWindow = document.getElementById('chat-window');
+  const userInput  = document.getElementById('user-input');
+  const sendBtn    = document.getElementById('send-btn');
+  const welcome    = document.getElementById('welcome');
+
+  const API_URL = '/v1/chat/completions';
+
+  // Auto-resize textarea
+  userInput.addEventListener('input', () => {
+    userInput.style.height = 'auto';
+    userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
+    sendBtn.disabled = !userInput.value.trim();
+  });
+
+  // Enter to send, Shift+Enter for newline
+  userInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!sendBtn.disabled) sendMessage();
+    }
+  });
+
+  sendBtn.addEventListener('click', sendMessage);
+
+  function scrollToBottom() {
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  }
+
+  function appendBubble(role, text, isError, sources) {
+    if (welcome && welcome.parentNode) welcome.remove();
+
+    const row = document.createElement('div');
+    row.className = 'bubble-row ' + role;
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.textContent = role === 'user' ? '👤' : '🤖';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble' + (isError ? ' error' : '');
+
+    if (role === 'bot' && !isError) {
+      // Strip any inline source citation from LLM text
+      const { mainText } = parseSource(text);
+      bubble.textContent = mainText;
+
+      // Render structured sources from API as clickable links
+      if (sources && sources.length > 0) {
+        const block = document.createElement('div');
+        block.className = 'source-block';
+        const label = document.createElement('strong');
+        label.textContent = 'מקורות:';
+        block.appendChild(label);
+
+        const ul = document.createElement('ul');
+        ul.className = 'source-list';
+        sources.forEach(function(src) {
+          const li = document.createElement('li');
+          const icon = document.createElement('span');
+          icon.className = 'source-icon';
+          icon.textContent = src.link.endsWith('.pdf') ? '\uD83D\uDCC4' : '\uD83D\uDD17';
+          li.appendChild(icon);
+
+          const a = document.createElement('a');
+          a.href = src.link;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          // Show a readable name from the URL
+          a.textContent = decodeURIComponent(
+            src.link.split('/').pop().replace(/\.(pdf|html|aspx|md)$/i, '')
+          ).replace(/-/g, ' ');
+          li.appendChild(a);
+          ul.appendChild(li);
+        });
+        block.appendChild(ul);
+        bubble.appendChild(block);
+      }
+    } else {
+      bubble.textContent = text;
+    }
+
+    row.appendChild(avatar);
+    row.appendChild(bubble);
+    chatWindow.appendChild(row);
+    scrollToBottom();
+  }
+
+  function showTyping() {
+    const row = document.createElement('div');
+    row.className = 'bubble-row bot';
+    row.id = 'typing-row';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.textContent = '🤖';
+
+    const ind = document.createElement('div');
+    ind.className = 'typing-indicator';
+    ind.innerHTML = '<span></span><span></span><span></span>';
+
+    row.appendChild(avatar);
+    row.appendChild(ind);
+    chatWindow.appendChild(row);
+    scrollToBottom();
+  }
+
+  function hideTyping() {
+    const el = document.getElementById('typing-row');
+    if (el) el.remove();
+  }
+
+  function setLocked(locked) {
+    userInput.disabled = locked;
+    sendBtn.disabled = locked;
+    if (!locked) {
+      userInput.focus();
+      sendBtn.disabled = !userInput.value.trim();
+    }
+  }
+
+  function parseSource(text) {
+    const idx = text.search(/\n?\s*"?מקור"?\s*[:\n]/);
+    if (idx === -1) return { mainText: text, sourceParts: null };
+    const mainText = text.slice(0, idx).trim();
+    const raw = text.slice(idx).trim()
+      .replace(/^"?מקור"?\s*:?\s*/i, '');
+    return { mainText, sourceParts: raw };
+  }
+
+  async function sendMessage() {
+    const text = userInput.value.trim();
+    if (!text) return;
+
+    appendBubble('user', text);
+    userInput.value = '';
+    userInput.style.height = 'auto';
+    setLocked(true);
+    showTyping();
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'harel-rag',
+          messages: [{ role: 'user', content: text }],
+        }),
+      });
+
+      hideTyping();
+
+      if (!res.ok) {
+        const err = await res.text();
+        appendBubble('bot', 'שגיאה מהשרת (' + res.status + '): ' + err, true);
+        return;
+      }
+
+      const data = await res.json();
+      const choice = data?.choices?.[0];
+      const answer = choice?.text ?? 'לא התקבלה תשובה.';
+      const sources = choice?.sources ?? [];
+      appendBubble('bot', answer, false, sources);
+    } catch (err) {
+      hideTyping();
+      appendBubble('bot', 'שגיאת תקשורת: ' + err.message, true);
+    } finally {
+      setLocked(false);
+    }
+  }
+</script>
+</body>
+</html>

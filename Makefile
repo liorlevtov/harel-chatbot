@@ -1,4 +1,4 @@
-.PHONY: install install-docling install-vector run-scrape run-prep-data scrape clean help milvus-start milvus-stop ingest
+.PHONY: install install-docling install-vector run-scrape run-prep-data scrape clean help milvus-start milvus-stop ingest run-chat
 
 VENV := .venv
 UV := uv
@@ -21,6 +21,7 @@ help:
 	@echo "  make milvus-stop     Stop Milvus vector database"
 	@echo "  make ingest          Insert data into vector database"
 	@echo "  make clean           Remove downloaded and prepared data"
+	@echo "  make run-chat        Start chat UI + API server on port 8000"
 	@echo ""
 
 install:
@@ -84,3 +85,7 @@ milvus-stop:
 
 ingest: install-vector
 	$(PYTHON) -m vector_db.ingest
+
+# Chat UI
+run-chat:
+	$(VENV)/bin/uvicorn app:app --host 127.0.0.1 --port 8000 --reload
