@@ -71,8 +71,9 @@ vector_store = FAISS(
 def create_or_load_faiss_index():
     if FAISS_INDEX_PATH.exists():
         print(f"Loading existing FAISS index from {FAISS_INDEX_PATH}...")
-        vector_store.load_local(
-            str(FAISS_INDEX_PATH), 
+        global vector_store
+        vector_store = FAISS.load_local(
+            str(FAISS_INDEX_PATH),
             embeddings=embeddings,
             allow_dangerous_deserialization=True
         )
