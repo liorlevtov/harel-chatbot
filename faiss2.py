@@ -6,6 +6,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import TextLoader
 from langchain_core.tools import tool
+from langchain_core.messages import SystemMessage, HumanMessage
 from langchain.agents import create_agent
 from pathlib import Path
 
@@ -14,20 +15,11 @@ RAG_HEB_TEMPLATE = """אתה עוזר וירטואלי של קבוצת ביטו�
 ענה על שאלת המשתמש אך ורק באמצעות המידע שסופק בקבצים.
 אם התשובה לא נמצאת בהקשר, אמור שאין לך מספיק מידע.
 היה תמציתי, מדויק ומועיל. השב באותה שפה שבה נשאלה השאלה
-החזר את התשובה בפורמט JSON הבא:
-{{
-    "answer": "תשובתך כאן",
-    "citations": [  # רשימת ציטוטים מהמקורות, או ריקה אם לא השתמשת בשום מקור
-        {{
-            "source": "שם הקובץ של מקור1",
-            "quote": "ציטוט ישיר מהמקור"
-        }},
-        ...
-    ]
-}}
+החזר תשובה בצורה מובנית עם שדות "answer" ו-"sources" ( הכוללת רשימת מקורות רלוונטיים, אם יש). לדוגמא
+    "מקור": 
+        "קובץ": "apartment/files/www.harel-group.co.il--2025.pdf",
+        "עמוד": 6
 """
-
-
 
 
 PROJECT_ROOT = Path(__file__).parent
@@ -44,6 +36,8 @@ NEBIUS_API_KEY = (
 )
 NEBIUS_BASE_URL = "https://api.tokenfactory.nebius.com/v1/"
 LLM_MODEL = "Qwen/Qwen3-32B"
+LLM_MODEL = "openai/gpt-oss-120b"
+LLM_MODEL = "Qwen/Qwen3-Next-80B-A3B-Thinking"
 
 EMBEDDING_MODEL = "BAAI/bge-multilingual-gemma2"
 # EMBEDDING_MODEL = "text-embedding-3-large"
@@ -54,7 +48,7 @@ def _make_llm() -> ChatOpenAI:
         model=LLM_MODEL,
         openai_api_key=NEBIUS_API_KEY,
         openai_api_base=NEBIUS_BASE_URL,
-        temperature=0.1,
+        temperature=0,
     )
 model = _make_llm()
 
@@ -81,12 +75,13 @@ vector_store = FAISS(
 
 
 def create_or_load_faiss_index():
+    global vector_store
     if FAISS_INDEX_PATH.exists():
         print(f"Loading existing FAISS index from {FAISS_INDEX_PATH}...")
-        vector_store.load_local(
-            str(FAISS_INDEX_PATH), 
+        vector_store = FAISS.load_local(
+            str(FAISS_INDEX_PATH),
             embeddings=embeddings,
-            allow_dangerous_deserialization=True
+            allow_dangerous_deserialization=True,
         )
         print("Index loaded successfully.")
 
@@ -156,10 +151,69 @@ def run_agent(vector_store: FAISS):
             response.pretty_print()
 
 
+def vector_store_retrieve(vector_store: FAISS, query: str, k: int = 5) -> list:
+    """Search FAISS index; returns list of (Document, relevance_score) pairs (higher = better)."""
+    return vector_store.similarity_search_with_relevance_scores(query, k=k)
+
+
+def _build_context_block(results: list, max_chars_per_chunk: int = 1500) -> str:
+    """Turn FAISS search results into a context string for the model."""
+    blocks = []
+    for i, (doc, score) in enumerate(results):
+        filename = doc.metadata.get("source", "unknown")
+        text = doc.page_content
+        if max_chars_per_chunk and len(text) > max_chars_per_chunk:
+            text = text[:max_chars_per_chunk] + "…"
+        blocks.append(f"[{i}] {filename} (score={score:.4f})\n{text}")
+    return "\n\n".join(blocks).strip()
+
+
+def ask_rag_with_manual_retrieval(
+        vector_store: FAISS,
+        min_top_score: float = 0.3,
+        k: int = 5,
+    ) -> dict:
+
+    while True:
+        question = input("\nEnter your question (or 'exit' to quit): ").strip()
+        if question.lower() in ["exit", "quit"]:
+            break
+
+        # 1) Retrieval
+        results = vector_store_retrieve(vector_store, question, k=k)
+        top_score = results[0][1] if results else None
+
+        # 2) Gate (relevance scores are in [0, 1]; higher = more similar)
+        if not results or top_score < min_top_score:
+            return {
+                "answer": "לא מצאתי מידע רלוונטי מספיק. נסה לנסח מחדש את השאלה.",
+                "top_score": top_score,
+                "used_results": [],
+            }
+
+        # 3) Generate from retrieved context
+        context = _build_context_block(results)
+        messages = [
+            SystemMessage(content=RAG_HEB_TEMPLATE),
+            HumanMessage(content=f"הקשר:\n{context}\n\nשאלה:\n{question}"),
+        ]
+        response = model.invoke(messages)
+
+        res = {
+            "answer": response.content,
+            "top_score": top_score,
+            "used_results": results,
+        }
+        print(res)
+
+
+
 def main():
-    vector_store = create_or_load_faiss_index()
-    print("\nFAISS index is ready. You can now query it using the 'run_agent' function.\n")
-    run_agent(vector_store)
+    create_or_load_faiss_index()
+    print("\nFAISS index is ready.\n")
+    result = ask_rag_with_manual_retrieval(vector_store)
+    print(f"Score: {result['top_score']:.4f}")
+    print(f"\nAnswer:\n{result['answer']}")
 
 
 if __name__ == "__main__":
