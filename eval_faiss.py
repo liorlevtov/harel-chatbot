@@ -1,10 +1,8 @@
 """
-Evaluate the FAISS RAG system (faiss2.py) against the ex2.json test set.
+Evaluate the FAISS RAG system against the ex2.json test set.
 
-Uses:
-  - get_test_questions() from classification_workflow.py  (question loading)
-  - Judge prompt from eval_harness.py                     (evaluation logic)
-  - faiss2.py FAISS index + Nebius LLM                   (answering + judging)
+Answers are produced by faiss2.answer_question() — the exact same pipeline
+users experience (hybrid retrieval, query rewriting, LLM-as-judge).
 
 No OpenAI API key required — everything runs through Nebius.
 """
@@ -16,33 +14,17 @@ from datetime import datetime
 from pathlib import Path
 
 from openai import OpenAI
-from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores import FAISS
 
 from classification_workflow import get_test_questions
+import faiss2
+from faiss2 import answer_question, create_or_load_faiss_index, NEBIUS_API_KEY, NEBIUS_BASE_URL, LLM_MODEL
 
 # ---------------------------------------------------------------------------
-# Config (Nebius only)
+# Config
 # ---------------------------------------------------------------------------
-NEBIUS_API_KEY = (
-    "v1.CmMKHHN0YXRpY2tleS1lMDBldHBiMzYyY3JuMngxcXYSIXNlcnZpY2VhY2NvdW50LWUwM"
-    "GtieTJqN2p6ajljYXJuczILCKeFo8wGEL26q1s6DAiliLuXBxDA0NfVA0ACWgNlMDA.AAAAAAAA"
-    "AAGNSitzi_mVnjLQCBIM0OeiIYDXqXQJwYLBqfTkFWqTVMAo_oZW5fhZCxCmfkh7rz9-U72xMI"
-    "LMxWQ7a8fAxkYG"
-)
-NEBIUS_BASE_URL = "https://api.tokenfactory.nebius.com/v1/"
-LLM_MODEL       = "openai/gpt-oss-120b"
-JUDGE_MODEL     = "openai/gpt-oss-120b"
-EMBEDDING_MODEL = "BAAI/bge-multilingual-gemma2"
+SUMMARY_PATH = Path(__file__).parent / "evaluation_summary.json"
+RUN_LABEL    = "baseline run"
 
-FAISS_INDEX_PATH  = Path(__file__).parent / "faiss_index_v2"
-SUMMARY_PATH      = Path(__file__).parent / "evaluation_summary.json"
-TOP_K = 6
-
-# Label can be passed as a CLI argument: python eval_faiss.py "my run label"
-RUN_LABEL = "baseline run"
-
-# Known baseline numbers from baseline_report.md
 BASELINES = {
     "GPT-4o": {
         "correct": 5, "abstention": 14, "hallucination_rate": 0.00, "citation_rate": 0.30,
@@ -58,36 +40,11 @@ BASELINES = {
 DOMAIN_TOTALS = {"דירה": 7, "עסקים": 5, "רכב": 3, "בריאות": 3, "נסיעות": 2}
 QTYPE_TOTALS  = {"yes_no_policy": 12, "factual_lookup": 8}
 
-# RAG quality-control judge (same as faiss2.py — validates answer before returning to user)
-RAG_JUDGE_SYSTEM_PROMPT = """You are a strict quality-control judge for an insurance chatbot (Harel Insurance, Israel).
-You will receive:
-  - QUESTION: the user's question
-  - CONTEXT: document excerpts retrieved from the knowledge base
-  - ANSWER: the chatbot's draft answer
+FACTUAL_KEYWORDS = ["מהי", "מהו", "מתי", "מה המחיר", "עלות", "מספר", "תעריף"]
 
-Your job is to evaluate the answer and return a JSON object with exactly these fields:
-{
-  "verdict": "<approved|hallucinated|incomplete|no_context>",
-  "critique": "<one sentence explaining your decision>",
-  "refined_answer": "<improved answer in the same language as the question, or null>"
-}
-
-Verdict definitions:
-- "approved"     : Answer is accurate, fully supported by the context, and complete.
-- "hallucinated" : Answer contains facts NOT present in the context (fabricated info).
-- "incomplete"   : Answer is partially correct but misses important details that ARE in the context.
-- "no_context"   : The context contains no relevant information to answer the question.
-
-Rules:
-- If verdict is "approved" or "no_context", set refined_answer to null.
-- If verdict is "hallucinated", set refined_answer to null (we will refuse the answer entirely).
-- If verdict is "incomplete", write a corrected refined_answer using ONLY the provided context.
-- refined_answer must be in the same language as the question.
-- refined_answer must include the source citation in the same format as the original answer.
-- Return ONLY valid JSON. No markdown, no explanation outside the JSON.
-"""
-
-# Eval scoring judge (from eval_harness.py)
+# ---------------------------------------------------------------------------
+# Eval scoring judge (compares generated answer against ground-truth reference)
+# ---------------------------------------------------------------------------
 JUDGE_SYSTEM_PROMPT = """You are an expert evaluator for an insurance Q&A system.
 You will receive a question, a reference answer (ground truth), and a generated answer.
 Evaluate the generated answer and respond with a JSON object containing:
@@ -109,13 +66,6 @@ Evaluate the generated answer and respond with a JSON object containing:
 
 Respond ONLY with the JSON object, no markdown formatting."""
 
-RAG_SYSTEM_PROMPT = """אתה עוזר וירטואלי של קבוצת ביטוח הראל.
-ענה על שאלת המשתמש אך ורק באמצעות המידע שסופק להלן.
-אם התשובה לא נמצאת בהקשר, אמור שאין לך מספיק מידע.
-היה תמציתי, מדויק ומועיל. השב באותה שפה שבה נשאלה השאלה."""
-
-FACTUAL_KEYWORDS = ["מהי", "מהו", "מתי", "מה המחיר", "עלות", "מספר", "תעריף"]
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -128,66 +78,10 @@ def classify_question_type(question: str) -> str:
     return "yes_no_policy"
 
 
-def _rag_judge(client: OpenAI, question: str, context: str, draft: str) -> dict:
-    """Quality-control judge: validate draft answer against retrieved context."""
-    user_msg = f"QUESTION:\n{question}\n\nCONTEXT:\n{context}\n\nANSWER:\n{draft}"
-    resp = client.chat.completions.create(
-        model=JUDGE_MODEL,
-        messages=[
-            {"role": "system", "content": RAG_JUDGE_SYSTEM_PROMPT},
-            {"role": "user", "content": user_msg},
-        ],
-        temperature=0,
-    )
-    raw = resp.choices[0].message.content.strip()
-    raw = re.sub(r"^```(?:json)?\s*", "", raw)
-    raw = re.sub(r"\s*```$", "", raw)
-    try:
-        return json.loads(raw)
-    except json.JSONDecodeError:
-        return {"verdict": "approved", "critique": "parse error", "refined_answer": None}
-
-
-def build_answer_fn(vs: FAISS, client: OpenAI):
-    def answer_fn(question: str) -> str:
-        # 1. Retrieve
-        docs = vs.similarity_search(question, k=TOP_K)
-        context = "\n\n".join(
-            f"[Source: {doc.metadata.get('source', '')}]\n{doc.page_content}"
-            for doc in docs
-        )
-        # 2. Generate draft
-        resp = client.chat.completions.create(
-            model=LLM_MODEL,
-            messages=[
-                {"role": "system", "content": RAG_SYSTEM_PROMPT},
-                {"role": "user", "content": f"הקשר:\n{context}\n\nשאלה: {question}"},
-            ],
-            temperature=0.1,
-        )
-        draft = resp.choices[0].message.content.strip()
-
-        # 3. Quality-control judge
-        judgment = _rag_judge(client, question, context, draft)
-        verdict = judgment.get("verdict", "approved")
-
-        if verdict == "approved":
-            return draft
-        elif verdict in ("hallucinated", "no_context"):
-            return "אין לי מספיק מידע כדי לענות על שאלה זו."
-        elif verdict == "incomplete":
-            refined = judgment.get("refined_answer")
-            return refined if refined else draft
-        else:
-            return draft
-
-    return answer_fn
-
-
 def judge(client: OpenAI, question: str, reference: str, generated: str) -> dict:
     try:
         resp = client.chat.completions.create(
-            model=JUDGE_MODEL,
+            model=LLM_MODEL,
             messages=[
                 {"role": "system", "content": JUDGE_SYSTEM_PROMPT},
                 {"role": "user", "content": f"Question: {question}\n\nReference answer (ground truth): {reference}\n\nGenerated answer: {generated}"},
@@ -205,7 +99,7 @@ def judge(client: OpenAI, question: str, reference: str, generated: str) -> dict
 
 def detect_abstention(text: str) -> bool:
     patterns = [r"לא יודע", r"אין לי מידע", r"לא מצאתי", r"לא ניתן לקבוע",
-                r"לא הצלחתי", r"I don't know", r"cannot verify", r"אין לך מספיק מידע", r"אין מספיק מידע"]
+                r"לא הצלחתי", r"I don't know", r"cannot verify", r"אין מספיק מידע"]
     return any(re.search(p, text, re.IGNORECASE) for p in patterns)
 
 
@@ -306,7 +200,6 @@ def print_comparison(agg: dict, n: int):
 # ---------------------------------------------------------------------------
 
 def append_to_summary(agg: dict, n: int, label: str):
-    """Append this run's key metrics to evaluation_summary.json."""
     jc = agg.get("judge_correctness", {})
     entry = {
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M"),
@@ -333,23 +226,17 @@ def append_to_summary(agg: dict, n: int, label: str):
     if SUMMARY_PATH.exists():
         with open(SUMMARY_PATH, encoding="utf-8") as f:
             runs = json.load(f)
-
     runs.append(entry)
-
     with open(SUMMARY_PATH, "w", encoding="utf-8") as f:
         json.dump(runs, f, ensure_ascii=False, indent=2)
-
     print(f"Run appended to {SUMMARY_PATH} ({len(runs)} total runs)")
 
 
 def print_summary_history():
-    """Print a compact table of all past runs."""
     if not SUMMARY_PATH.exists():
         return
-
     with open(SUMMARY_PATH, encoding="utf-8") as f:
         runs = json.load(f)
-
     if not runs:
         return
 
@@ -376,28 +263,14 @@ def print_summary_history():
 # ---------------------------------------------------------------------------
 
 def main(label: str = RUN_LABEL):
-    # Load test questions from classification_workflow
     test_cases = get_test_questions()
     print(f"Loaded {len(test_cases)} test questions.\n")
 
-    # Nebius client (used for both answering and judging)
-    nebius_client = OpenAI(base_url=NEBIUS_BASE_URL, api_key=NEBIUS_API_KEY)
-
-    # Load FAISS index
-    print("Loading FAISS index...")
-    embeddings = OpenAIEmbeddings(
-        model=EMBEDDING_MODEL,
-        openai_api_key=NEBIUS_API_KEY,
-        openai_api_base=NEBIUS_BASE_URL,
-        check_embedding_ctx_length=False,
-    )
-    vs = FAISS.load_local(
-        str(FAISS_INDEX_PATH),
-        embeddings=embeddings,
-        allow_dangerous_deserialization=True,
-    )
-    answer_fn = build_answer_fn(vs, nebius_client)
+    # Initialise faiss2's global state (index + hybrid retriever + table store)
+    create_or_load_faiss_index()
     print("Ready.\n")
+
+    nebius_client = OpenAI(base_url=NEBIUS_BASE_URL, api_key=NEBIUS_API_KEY)
 
     per_question = []
     for i, case in enumerate(test_cases):
@@ -406,10 +279,10 @@ def main(label: str = RUN_LABEL):
         domain    = case["type"]
         qtype     = classify_question_type(question)
 
-        print(f"[{i+1}/{len(test_cases)}] {domain}: {question[:60]}...")
+        print(f"[{i+1}/{len(test_cases)}] {domain}: {question[:60]}...".encode("utf-8", errors="replace").decode("ascii", errors="replace"))
 
         t0 = time.time()
-        generated = answer_fn(question)
+        generated = answer_question(question)   # exact same function as the chatbot
         latency = round(time.time() - t0, 2)
 
         judge_result = judge(nebius_client, question, reference, generated)
