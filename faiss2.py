@@ -37,7 +37,7 @@ NEBIUS_API_KEY = (
 NEBIUS_BASE_URL = "https://api.tokenfactory.nebius.com/v1/"
 LLM_MODEL = "Qwen/Qwen3-32B"
 LLM_MODEL = "openai/gpt-oss-120b"
-LLM_MODEL = "Qwen/Qwen3-Next-80B-A3B-Thinking"
+# LLM_MODEL = "Qwen/Qwen3-Next-80B-A3B-Thinking"
 
 EMBEDDING_MODEL = "BAAI/bge-multilingual-gemma2"
 # EMBEDDING_MODEL = "text-embedding-3-large"
@@ -151,9 +151,22 @@ def run_agent(vector_store: FAISS):
             response.pretty_print()
 
 
-def vector_store_retrieve(vector_store: FAISS, query: str, k: int = 5) -> list:
-    """Search FAISS index; returns list of (Document, relevance_score) pairs (higher = better)."""
-    return vector_store.similarity_search_with_relevance_scores(query, k=k)
+def vector_store_retrieve(
+    vector_store: FAISS,
+    query: str,
+    k: int = 5,
+    fetch_k: int = 20,
+    score_threshold: float = 0.4,
+) -> list:
+    """
+    Search FAISS index with relevance filtering.
+
+    Fetches `fetch_k` candidates, discards any below `score_threshold`,
+    then returns the top `k` survivors (higher score = more relevant).
+    """
+    candidates = vector_store.similarity_search_with_relevance_scores(query, k=fetch_k)
+    filtered = [(doc, score) for doc, score in candidates if score >= score_threshold]
+    return filtered[:k]
 
 
 def _build_context_block(results: list, max_chars_per_chunk: int = 1500) -> str:
@@ -204,7 +217,7 @@ def ask_rag_with_manual_retrieval(
             "top_score": top_score,
             "used_results": results,
         }
-        print(res)
+        print(res['answer'])
 
 
 
