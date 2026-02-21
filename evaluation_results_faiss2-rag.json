@@ -3,50 +3,50 @@
   "num_questions": 20,
   "aggregates": {
     "judge_correctness": {
-      "wrong": 3,
-      "abstention": 10,
-      "partially_correct": 1,
-      "correct": 6
+      "wrong": 9,
+      "abstention": 4,
+      "partially_correct": 2,
+      "correct": 5
     },
-    "hallucination_rate": 0.15,
-    "citation_rate": 0.1,
-    "abstention_rate": 0.5,
+    "hallucination_rate": 0.4,
+    "citation_rate": 0.55,
+    "abstention_rate": 0.2,
     "by_domain": {
       "דירה": {
         "total": 7,
         "correct": 1,
-        "abstention": 3
+        "abstention": 2
       },
       "עסקים": {
         "total": 5,
         "correct": 2,
-        "abstention": 2
+        "abstention": 1
       },
       "רכב": {
         "total": 3,
-        "correct": 1,
-        "abstention": 2
+        "correct": 0,
+        "abstention": 1
       },
       "בריאות": {
         "total": 3,
         "correct": 1,
-        "abstention": 2
+        "abstention": 0
       },
       "נסיעות": {
         "total": 2,
         "correct": 1,
-        "abstention": 1
+        "abstention": 0
       }
     },
     "by_question_type": {
       "yes_no_policy": {
         "total": 12,
-        "correct": 2,
+        "correct": 3,
         "abstention": 0
       },
       "factual_lookup": {
         "total": 8,
-        "correct": 4,
+        "correct": 2,
         "abstention": 0
       }
     }
@@ -57,14 +57,14 @@
       "question_type": "yes_no_policy",
       "prompt": "עבור ביטוח דירה, האם יש כיסוי למקרה נזק של מחשב נייד?",
       "reference": "לא",
-      "generated": "כן. בפוליסת ביטוח דירה של הראל ניתן לכלול כיסוי למחשבים ניידים במסגרת **הכיסוי למכשירים אלקטרוניים ביתיים** (או “כל הסיכונים למכשירים אלקטרונים ביתיים”).  \n\nבמסגרת הטופס יש למלא:\n\n* **סוג המכשיר** – מחשב נייד  \n* **יצרן** – (לדוגמה: Dell, Apple, HP וכו')  \n* **דגם** – (לדוגמה: XPS 13, MacBook Pro וכו')  \n* **שווי** – סכום הביטוח במ״ש  \n\nהכיסוי נרשם בטופס תחת השורה:\n\n```\n(כל הסיכונים למכשירים אלקטרונים ביתיים) נא לציין את סוג המכשיר, יצרן, דגם ושוויו\n```\n\nאם תסמן “כן” ותפרט את המחשב, הפוליסה תכלול כיסוי לנזק למחשב הנייד (לדוגמה – נזק פיזי, אש, גניבה, נזק נגרם במבנה). אם לא תסמן “כן”, המחשב לא יהיה מבוטח.  \n\nלכן, כדי לקבל כיסוי למחשב נייד יש לציין אותו בטופס ולציין את ערכו. אם יש לך שאלות נוספות לגבי סכום הביטוח המומלץ או תנאי ההשתתפות העצמית, אפשר לפנות למוקד שירות הלקוחות של הראל.",
+      "generated": "כן, בפוליסת ביטוח דירה של הראל קיימת אפשרות לכיסוי כל הסיכונים למכשירים אלקטרוניים ביתיים – כולל מחשב נייד. במסגרת הטופס יש לציין את סוג המכשיר, היצרן, הדגם ושוויו.  \n\n**מקור**:  \n```json\n{\n  \"קובץ\": \"C:\\\\Users\\\\micha\\\\Projects\\\\harel-chatbot\\\\data_prepared\\\\business\\\\files\\\\טופס-הצעה-לביטוח-מכלול-למושב_4851be68.md\",\n  \"עמוד\": \"לא זמין\"\n}\n```",
       "abstention_heuristic": false,
-      "latency_seconds": 5.43,
+      "latency_seconds": 10.84,
       "judge": {
         "correctness": "wrong",
         "hallucination": true,
-        "has_citation": false,
-        "explanation": "The generated answer claims that home insurance can cover a laptop, while the reference answer states there is no such coverage."
+        "has_citation": true,
+        "explanation": "The generated answer says coverage exists, contradicting the reference answer which states there is no coverage."
       }
     },
     {
@@ -72,14 +72,14 @@
       "question_type": "yes_no_policy",
       "prompt": "האם הרחבת ביטוח הדירה שתכלול כיסוי על נזק לצמחים והשקייה דורשת תשלום נוסף?",
       "reference": "לא",
-      "generated": "אין לי מספיק מידע כדי לענות על שאלה זו.",
-      "abstention_heuristic": false,
-      "latency_seconds": 3.72,
+      "generated": "אין לי מידע בתיקיות שסופקו לגבי דרישת תשלום נוסף עבור הרחבת ביטוח דירה שתכלול כיסוי לנזק לצמחים והשקייה.  \n\n**מקור**:  \n- קובץ: `business/files/טופס-הצעה-לפוליסת-מכלול-לחבר-מושב_49e55319.md`  \n- עמוד: (הקובץ אינו מכיל התייחסות לנושא).",
+      "abstention_heuristic": true,
+      "latency_seconds": 7.63,
       "judge": {
         "correctness": "abstention",
         "hallucination": false,
-        "has_citation": false,
-        "explanation": "The generated answer declines to answer, whereas the reference provides a definitive 'No' response."
+        "has_citation": true,
+        "explanation": "The answer does not provide the required yes/no response and states lack of information, which is an abstention rather than the correct 'no' answer."
       }
     },
     {
@@ -87,14 +87,14 @@
       "question_type": "factual_lookup",
       "prompt": "מתי דירה נחשבת לא תפוסה?",
       "reference": "דירה הפנויה למעלה מ-60 ימים רצופים, או שבפועל לא התגוררו בה באופן סדיר למעלה מ-60 ימים רצופים נחשבת לא תפוסה.",
-      "generated": "דירה נחשבת **לא תפוסה (לא מיושבת)** כאשר היא אינה מיושבת – כלומר אין בה דיירים ואין אף מגורים בפועל. בטופס הביטוח יש לסמן את האפשרות “דירה לא תפוסה (לא מיושבת)” ולציין את תאריכי ההתחלה והסיום של תקופת אי‑הקיום.",
+      "generated": "דירה נחשבת לא תפוסה אם המבוטח לא התגורר בפועל בה במשך 60 ימים רצופים.",
       "abstention_heuristic": false,
-      "latency_seconds": 3.74,
+      "latency_seconds": 2.31,
       "judge": {
         "correctness": "partially_correct",
         "hallucination": false,
         "has_citation": false,
-        "explanation": "The answer correctly states that a vacant (uninhabited) apartment is considered 'not occupied', but it omits the specific 60‑day continuous vacancy requirement from the reference."
+        "explanation": "The answer captures the 60‑day vacancy rule but omits the “more than 60 days” detail and the broader condition of irregular habitation, so it is incomplete."
       }
     },
     {
@@ -102,14 +102,14 @@
       "question_type": "yes_no_policy",
       "prompt": "האם הביטוח מכסה נזק לדירה שנגרם כתוצאה מפגיעת ברק?",
       "reference": "כן",
-      "generated": "אין לי מספיק מידע כדי לענות על שאלה זו.",
+      "generated": "לפי המידע שבקבצים שסופקו (טפסי הצעת ביטוח דירה), מתוארים כיסויים כגון נזקי מים, פריצה, גניבה, נזקי צנרת ועוד, אך אין אזכור של כיסוי לנזק שנגרם כתוצאה מפגיעת ברק. לכן אין לנו מידע שמצביע על כך שהביטוח כולל כיסוי כזה.  \n\n**מקור**:  \n- קובץ: `apartment/files/טופס-הצעה-לפוליסת-ביטוח-דירה-אדירה-ארד_432bc39f.md` (החלק המתאר את אפשרויות הכיסוי).",
       "abstention_heuristic": false,
-      "latency_seconds": 1.93,
+      "latency_seconds": 8.1,
       "judge": {
-        "correctness": "abstention",
-        "hallucination": false,
-        "has_citation": false,
-        "explanation": "The generated answer declines to answer, whereas the reference says 'yes', so it does not provide the correct information."
+        "correctness": "wrong",
+        "hallucination": true,
+        "has_citation": true,
+        "explanation": "The generated answer states that the policy does not cover lightning damage, contradicting the reference answer which says it does."
       }
     },
     {
@@ -119,12 +119,12 @@
       "reference": "לא, רק עבור אופניים ללא מנוע עזר",
       "generated": "אין לי מספיק מידע כדי לענות על שאלה זו.",
       "abstention_heuristic": false,
-      "latency_seconds": 2.6,
+      "latency_seconds": 11.46,
       "judge": {
         "correctness": "abstention",
         "hallucination": false,
         "has_citation": false,
-        "explanation": "The generated answer declines to answer, providing no factual content, thus it is an abstention and not a hallucination."
+        "explanation": "The generated answer declines to answer, providing no factual content, thus it is an abstention."
       }
     },
     {
@@ -132,14 +132,14 @@
       "question_type": "yes_no_policy",
       "prompt": "יש לי ביטוח דירה, ועל הגג ישנו דוד שמש בנפח 300 ליטר. נגרם נזק לאחרונה, האם אני מכוסה על הנזק במקרה הזה?",
       "reference": "לא, הביטוח לא חל על דוד שנפחו מעל 200 ליטר",
-      "generated": "לפי תנאי הפוליסה, כיסוי לדודי שמש חל **על דוד ביתי** שמסומן בתו‑ליטר, **בנפח מרבי של 200 ליטר** ולא יותר.  \nהדוד שעל הגג שלך הוא בנפח **300 ליטר**, ולכן אינו עומד בתנאי הכיסוי.  \n\nלכן, במקרה של נזק לדוד שמש של 300 ליטר, הפוליסה **אינה מכסה** את הנזק (גם אם קיימת מגבלת פיצוי של עד 10 000 ש״ח עבור דודים שעומדים בתנאי). אם תרצה כיסוי, יהיה צורך להחליף את הדוד לדגם של עד 200 ליטר ולוודא שההוספה נרשמה במפרט הפוליסה.",
+      "generated": "הכיסוי לדודי שמש חל רק על דוד ביתי לחימום מים בעל נפח מירבי של 200 ליטר (או פחות) המותקן בדירה לפי תקן ישראלי. מכיוון שהדוד שעל הגג שלך הוא בנפח 300 ליטר, הוא חורג מהמגבלה שנקבעה ולכן הנזק שנגרם לו אינו מכוסה במסגרת פוליסת דירה.\n\n**מקור**:  \n```json\n{\n  \"קובץ\": \"apartment/files/תנאי-פוליסת-ביטוח-דירה-אדירה-כסף-מהדורת-פברואר-2025_fd938803.md\",\n  \"עמוד\": null\n}\n```",
       "abstention_heuristic": false,
-      "latency_seconds": 6.54,
+      "latency_seconds": 9.47,
       "judge": {
         "correctness": "correct",
         "hallucination": false,
-        "has_citation": false,
-        "explanation": "The answer correctly states that a 300 L solar heater is not covered because the policy limits coverage to 200 L, matching the reference."
+        "has_citation": true,
+        "explanation": "The answer correctly states that coverage is limited to water heaters up to 200 L and therefore a 300 L unit is not covered, matching the reference."
       }
     },
     {
@@ -147,14 +147,14 @@
       "question_type": "yes_no_policy",
       "prompt": "אני מבוטח אצלכם בביטוח דירה, והחלה רטיבות בתקרה שנגרמת כנראה ממי גשמים שנספגים בה. אני זכאי לכיסוי על מקרה כזה?",
       "reference": "לא",
-      "generated": "הכיסוי לנזקי מים ונוזלים אחרים (כולל נזילות, רטיבות ו‑…​) אינו חלק מהפוליסה הבסיסית – הוא נרכש רק אם בחרת להוסיף את **כיסוי נזקי מים ונוזלים אחרים** בטופס ההצעה ועברת את שאלות האימות (האם ידוע לך על דליפת מים, האם הצנרת במצב תקין וכו׳).  \n\nאם:\n\n* **הוספת את הכיסוי** – והדירה **תפוסה** (הפוליסה מציינת שאין כיסוי למים כאשר הדירה ריקה) – ייתכן שהרטיבות בתקרה תיכנס לתחום הכיסוי, בהתאם לתנאי הפוליסה המלאים (לדוגמה, האם מדובר בנזילה ממערכת צנרת או חדירת גשם דרך קירות/גג).  \n* **לא הוספת את הכיסוי** – או שהדירה אינה תפוסה – אז **הנזק אינו מכוסה**.\n\nלכן, כדי לדעת בוודאות אם המקרה שלך מכוסה, יש לבדוק האם בחרת באפשרות “הוספת כיסוי נזקי מים ונוזלים אחרים” ולקרוא את תנאי הפוליסה המלאים. אם לא, הכיסוי אינו קיים.",
+      "generated": "כן, פוליסת ביטוח הדירה כוללת כיסוי לנזקים שנגרמים כתוצאה מרטיבות שנכנסת דרך חיצוניות המבנה – קירות, חלונות, תקרות – כולל חדירת מים או גשמים.",
       "abstention_heuristic": false,
-      "latency_seconds": 6.77,
+      "latency_seconds": 3.09,
       "judge": {
         "correctness": "wrong",
         "hallucination": true,
         "has_citation": false,
-        "explanation": "The generated answer suggests the damage could be covered if optional water damage coverage was added, contradicting the reference's definitive 'no' answer."
+        "explanation": "The generated answer says the policy covers the moisture damage, directly contradicting the reference answer which states it is not covered."
       }
     },
     {
@@ -162,14 +162,14 @@
       "question_type": "factual_lookup",
       "prompt": "מהי תקופת ההתיישנות של תביעה לתגמולי ביטוח?",
       "reference": "שלוש שנים מיום קרות מקרה הביטוח.",
-      "generated": "תקופת ההתיישנות של תביעה לתגמולי ביטוח היא **שלוש שנים** ממועד אירוע הביטוח. בביטוח אחריות מקצועית, התביעה אינה מתיישנת כל עוד לא התיישנה תביעת צד שלישי נגד המבוטח.",
+      "generated": "תקופת ההתיישנות של תביעה לתגמולי ביטוח היא שלוש שנים ממועד קרות מקרה הביטוח.  \n\n**מקור**:  \n```json\n{\n  \"קובץ\": \"general/files/הודעה-על-תקופת-התיישנות_3fcc0d4f.md\",\n  \"עמוד\": null\n}\n```",
       "abstention_heuristic": false,
-      "latency_seconds": 3.55,
+      "latency_seconds": 8.87,
       "judge": {
         "correctness": "correct",
         "hallucination": false,
-        "has_citation": false,
-        "explanation": "The answer states the prescription period is three years from the insurance event, matching the reference; the additional detail does not contradict the core fact."
+        "has_citation": true,
+        "explanation": "The answer repeats the same three‑year limitation as the reference and adds a citation, with no contradictory information."
       }
     },
     {
@@ -177,14 +177,14 @@
       "question_type": "yes_no_policy",
       "prompt": "אני מבוטח אצלכם בפוליסה לביטוח אבדן רישיון רופא, והתחילו נגדי תהליכים משפטיים לשלילת הרשיון – האם הביטוח מכסה את ההוצאות המשפטיות?",
       "reference": "כן",
-      "generated": "הביטוח **אבדן רישיון רופא** אינו כולל באופן אוטומטי כיסוי להוצאות משפטיות בתהליכים פליליים.  \nעם זאת, בטופס ההצעה מופיעה אפשרות **להרחיב את הביטוח** כך שיכסה הוצאות משפט בהליכים פליליים, עם גבול של **100 000 ש״ח** לכל מקרה ולכל תקופת הביטוח.\n\nלכן:\n\n* אם בחרת/ה באפשרות “כן” להרחבת הכיסוי – ההוצאות המשפטיות יכוסו עד הסכום המוגדר.  \n* אם לא בחרת באפשרות זו – ההוצאות המשפטיות אינן מכוסות במסגרת הפוליסה הרגילה.  \n\nבמקרה של תהליכים משפטיים נגדך, מומלץ לבדוק האם הרחבת הכיסוי נרשמה בפוליסה שלך, ואם לא – לשקול להוסיף אותה דרך סוכן הביטוח.",
+      "generated": "הפוליסה לביטוח אבדן רישיון רופא אינה כוללת באופן אוטומטי כיסוי להוצאות משפטיות בתהליכים של שלילת רישיון. הכיסוי להוצאות משפטיות ניתן רק אם בחרת להרחיב את הביטוח בהתאם לאפשרות המופיעה בטופס:\n\n> “אם ברצונך להרחיב את הביטוח לכיסוי הוצאות משפט בהליכים פליליים? – [ ] כן – [ ] לא”  \n\nלכן, אם לא סימנת “כן” באפשרות זו, ההוצאות המשפטיות הקשורות לתהליכים של שלילת הרישיון אינן מכוסות.\n\n**מקור**:  \n```json\n{\n  \"קובץ\": \"general/files/22247_tofes_22530a_sofi_mail_7543580d.md\",\n  \"עמוד\": 1\n}\n```",
       "abstention_heuristic": false,
-      "latency_seconds": 5.29,
+      "latency_seconds": 10.06,
       "judge": {
         "correctness": "wrong",
         "hallucination": true,
-        "has_citation": false,
-        "explanation": "The generated answer claims legal expenses are not covered unless an optional extension is added, contradicting the reference answer which states the coverage is provided."
+        "has_citation": true,
+        "explanation": "The generated answer claims legal expenses are not covered unless an optional extension is selected, contradicting the reference answer which states the expenses are covered."
       }
     },
     {
@@ -192,14 +192,14 @@
       "question_type": "factual_lookup",
       "prompt": "מהו מספר הטלפון של מוקד תביעות ביטוח כללי של הראל?",
       "reference": "03-9294000",
-      "generated": "מספר הטלפון של מוקד תביעות ביטוח כללי של הראל הוא **03‑9294000**.",
+      "generated": "072-2756606",
       "abstention_heuristic": false,
-      "latency_seconds": 1.89,
+      "latency_seconds": 2.53,
       "judge": {
-        "correctness": "correct",
-        "hallucination": false,
+        "correctness": "wrong",
+        "hallucination": true,
         "has_citation": false,
-        "explanation": "The generated answer provides the exact phone number given in the reference."
+        "explanation": "The generated answer provides a different phone number (072-2756606) than the reference (03-9294000), contradicting the factual answer."
       }
     },
     {
@@ -209,7 +209,7 @@
       "reference": "לא",
       "generated": "אין לי מספיק מידע כדי לענות על שאלה זו.",
       "abstention_heuristic": false,
-      "latency_seconds": 2.82,
+      "latency_seconds": 11.31,
       "judge": {
         "correctness": "abstention",
         "hallucination": false,
@@ -222,14 +222,14 @@
       "question_type": "yes_no_policy",
       "prompt": "אני מבוטח בפוליסת מכלול למושב. יש בשטח שלי מבנה שעשוי מלוחות אסבסט, האם הוא נחשב \"מבנה מסיבי\"?",
       "reference": "כן",
-      "generated": "אין לי מספיק מידע כדי לענות על שאלה זו.",
+      "generated": "כן, מבנה העשוי מלוחות אסבסט נחשב למבנה מסיבי.",
       "abstention_heuristic": false,
-      "latency_seconds": 4.18,
+      "latency_seconds": 2.55,
       "judge": {
-        "correctness": "abstention",
+        "correctness": "correct",
         "hallucination": false,
         "has_citation": false,
-        "explanation": "The generated answer declines to answer, whereas the reference provides a definitive 'yes' response."
+        "explanation": "The generated answer affirms that an asbestos board structure is considered massive, matching the reference answer."
       }
     },
     {
@@ -237,14 +237,14 @@
       "question_type": "yes_no_policy",
       "prompt": "אני מבוטח בהראל בפוליסה לביטוח צ.מ.ה. מכלי דלק שברשותי ניזוקו וכל הדלק שהיה בהם נזל ואבד, האם אני מכוסה על מחיר הדלק שאבד?",
       "reference": "לא",
-      "generated": "אין לי מספיק מידע כדי לענות על שאלה זו.",
-      "abstention_heuristic": false,
-      "latency_seconds": 3.15,
+      "generated": "אין לי מידע מספיק בתיעוד שסופק כדי לקבוע האם פוליסת צ.מ.ה (ציוד מכני הנדסי) של הראל מכסה אובדן דלק כתוצאה מנזק למכלי הדלק.  \n\n**מקור**: קבצים `תנאי-פוליסת-ביטוח-ציוד-מכני-הנדסי-צמה_36bdef3e.md` ו‑`פוליסה-לביטוח-ציוד-אלקטרוני-הראל-ביט-ינואר-2023_0e2b9cf4.md` אינם מפרטים כיסוי ספציפי לאובדן דלק.  \n\nלכן, עליך לפנות ישירות לחברת הראל או לעיין בתנאי הפוליסה המלאים לקבלת תשובה מדויקת.",
+      "abstention_heuristic": true,
+      "latency_seconds": 11.74,
       "judge": {
-        "correctness": "abstention",
+        "correctness": "wrong",
         "hallucination": false,
-        "has_citation": false,
-        "explanation": "The generated answer declines to answer, whereas the reference provides a definitive 'No' response."
+        "has_citation": true,
+        "explanation": "The reference answer is a clear 'No', but the generated answer says it lacks sufficient information and does not provide the definitive answer."
       }
     },
     {
@@ -252,14 +252,14 @@
       "question_type": "factual_lookup",
       "prompt": "מהי תקופת ההתיישנות של תביעה מכוח פוליסת ביטוח \"תו סוחר\" - רכב חובה?",
       "reference": "שבע שנים",
-      "generated": "תקופת ההתיישנות של תביעה מכוח פוליסת “תו סוחר” – ביטוח חובה – היא **שבע (7) שנים** ממועד קרות מקרה הביטוח, בהתאם לחוק ההתיישנות, תשי״ח 1958 (סעיף 5).  \n\n*הערה*: הגשת תביעה לגוף מוסדי (למשל לחברת הביטוח) אינה עוצרת את מרוץ ההתיישנות; רק הגשת תביעה לבית משפט היא שמפסיקה את הספירה. אם המקרה אירע מחוץ לישראל או לנפגע שאינו אזרח ישראלי, חלה תקופת ההתיישנות לפי הדין הרלוונטי במקום האירוע.",
+      "generated": "תקופת ההתיישנות מפורטת בחוברת הכללים בעמוד 21 תחת סעיף \"חובה ביטוח - התיישנות תקופת על הודעה\".",
       "abstention_heuristic": false,
-      "latency_seconds": 3.92,
+      "latency_seconds": 4.19,
       "judge": {
-        "correctness": "correct",
+        "correctness": "partially_correct",
         "hallucination": false,
         "has_citation": true,
-        "explanation": "The answer states the limitation period is seven years, matching the reference, and adds accurate legal detail with a citation."
+        "explanation": "The answer does not provide the required seven‑year period, only points to a source, so it is incomplete but not factually incorrect."
       }
     },
     {
@@ -269,12 +269,12 @@
       "reference": "לא",
       "generated": "אין לי מספיק מידע כדי לענות על שאלה זו.",
       "abstention_heuristic": false,
-      "latency_seconds": 3.67,
+      "latency_seconds": 13.9,
       "judge": {
         "correctness": "abstention",
         "hallucination": false,
         "has_citation": false,
-        "explanation": "The generated answer refuses to answer, whereas the reference answer is a definitive 'no'."
+        "explanation": "The generated answer refuses to answer, whereas the reference answer is a definitive 'No', so it does not provide the correct information."
       }
     },
     {
@@ -282,14 +282,14 @@
       "question_type": "factual_lookup",
       "prompt": "מה המחיר ההשתתפות העצמית של טיפול רופא בביקור בית?",
       "reference": "25 שקלים",
-      "generated": "אין לי מספיק מידע כדי לענות על שאלתך.",
+      "generated": "ההשתתפות העצמית בטיפול רופא בביקור בית היא 20 % מההוצאה בפועל.\n\n**מקור**:\n- קובץ: `גילוי_נאות_לנספח_שירותים_רפואיים_אמבולטוריים_3a1755cd.md` (שורה: \"עצמית השתתפות 20% בפועל מההוצאה\")",
       "abstention_heuristic": false,
-      "latency_seconds": 2.11,
+      "latency_seconds": 10.7,
       "judge": {
-        "correctness": "abstention",
-        "hallucination": false,
-        "has_citation": false,
-        "explanation": "The generated answer declines to provide the factual co‑payment amount, which is 25 shekels according to the reference."
+        "correctness": "wrong",
+        "hallucination": true,
+        "has_citation": true,
+        "explanation": "The answer states a 20% co‑payment, contradicting the reference's fixed 25 shekel amount, thus it is factually incorrect and introduces a false claim."
       }
     },
     {
@@ -297,14 +297,14 @@
       "question_type": "factual_lookup",
       "prompt": "אני מנוי ברפואה אישית און ליין פלוס - מה המחיר ההשתתפות העצמית של ייעוץ פסיכולוגי מקוון?",
       "reference": "100 שקל לכל ייעוץ",
-      "generated": "המחיר של ההשתתפות העצמית עבור ייעוץ פסיכולוגי מקוון הוא **100 ש״ח** לכל ייעוץ.",
+      "generated": "ההשתתפות העצמית היא 20 % מהעלות, כלומר כ‑20 ₪ לכל ייעוץ פסיכולוגי מקוון (העלות המלאה 100 ₪).",
       "abstention_heuristic": false,
-      "latency_seconds": 3.67,
+      "latency_seconds": 4.78,
       "judge": {
-        "correctness": "correct",
-        "hallucination": false,
+        "correctness": "wrong",
+        "hallucination": true,
         "has_citation": false,
-        "explanation": "The generated answer states the same price (100 ₪ per consultation) as the reference answer."
+        "explanation": "The generated answer states the co‑pay is 20 ₪ (20 % of 100 ₪), which contradicts the reference answer that the co‑pay is 100 ₪ per consultation."
       }
     },
     {
@@ -312,14 +312,14 @@
       "question_type": "factual_lookup",
       "prompt": "בני מבוטח אצלכם בתוכנית ביטוח לניתוחים וטיפולים מחליפי ניתוח בישראל – שקל ראשון. הוא בן 14, מהי עלות הביטוח החודשית עבורו?",
       "reference": "38.27 שקלים לחודש",
-      "generated": "אין לי מספיק מידע כדי לספק את עלות הביטוח החודשית עבור ילד בן 14 בתוכנית “ראשון – שקל ראשון” לניתוחים וטיפולים מחליפי ניתוח בישראל.",
+      "generated": "העלות החודשית היא 38.27 ש״ח.",
       "abstention_heuristic": false,
-      "latency_seconds": 2.63,
+      "latency_seconds": 3.31,
       "judge": {
-        "correctness": "abstention",
+        "correctness": "correct",
         "hallucination": false,
         "has_citation": false,
-        "explanation": "The answer declines to provide the known monthly cost, whereas the reference gives a specific amount, so it is an abstention and not correct."
+        "explanation": "The generated answer states the monthly cost as 38.27 ₪, which matches the reference answer."
       }
     },
     {
@@ -327,14 +327,14 @@
       "question_type": "yes_no_policy",
       "prompt": "אני בן 23 וטס לשנה וחצי של טיול בארצות הברית, האם אוכל להיות מבוטח אצלכם בתוכנית דרכון FIRST CLASS לכל אורך התקופה?",
       "reference": "לא, יש מגבלה של עד 365 ימים",
-      "generated": "לצערנו, לא. בתוכנית **דרכון FIRST CLASS** תקופת הביטוח המקסימלית למבוטח בגיל 23 היא **365 יום** בלבד (ראו את טבלת “תקופת הביטוח” – גיל 0‑50).  \n\nבנוסף, תעריפי הפוליסה המופיעים במדריך **12.2024 – מהדורת FIRST CLASS** חלים “לכל היעדים (למעט ארצות הברית)”. ולכן גם אם הייתה אפשרות לביטוח לתקופה ארוכה, ארצות הברית אינן נכללות בכיסוי.\n\nאם אתה צריך כיסוי לשנה וחצי ולנסיעה לארה״ב, תצטרך לבדוק תוכנית אחרת או לשלב כמה פוליסות, בהתאם לתנאי הביטוח של הראל.",
+      "generated": "לא. תוכנית **דרכון FIRST CLASS** אינה כוללת את ארצות הברית (הטבלה מתייחסת “לכל היעדים (למעט ארצות הברית)”), ובנוסף תקופת הביטוח המקסימלית המותרת למבוטחים בגיל 0‑50 היא **365 יום** בלבד, ולכן לא ניתן לבטח טיול של שנה וחצי.  \n\n**מקור**:  \n- “תעריפים דרכון לכל היעדים (למעט ארצות הברית)” – קובץ `תעריפון-דרכון-first-class_b0de1354.md`, עמוד 1  \n- “יום 365 … הביטוח תקופת” – קובץ `גבולות-אחריות-דרכון-first-class_72653d9c.md`, עמוד 1",
       "abstention_heuristic": false,
-      "latency_seconds": 3.58,
+      "latency_seconds": 8.02,
       "judge": {
         "correctness": "correct",
         "hallucination": false,
         "has_citation": true,
-        "explanation": "The answer correctly states the 365‑day limit, matching the reference, and adds extra (non‑contradictory) details with document citations."
+        "explanation": "The answer correctly states that coverage is not possible because of the 365‑day limit, matching the reference, and provides citations without introducing false information."
       }
     },
     {
@@ -342,14 +342,14 @@
       "question_type": "factual_lookup",
       "prompt": "אני בן 31 וטס בקרוב להודו, אני מתכנן לקנות ביטוח אצלכם בתוכנית דרכון FIRST CLASS. מה יהיה התעריף היומי של הפוליסה הבסיסית אצלכם?",
       "reference": "2.2 דולר ליום",
-      "generated": "אין לי מספיק מידע במקורות שסופקו כדי לציין את התעריף היומי של הפוליסה הבסיסית בתוכנית דרכון FIRST CLASS ליעד הודו.",
+      "generated": "התעריף היומי של הפוליסה הבסיסית בתוכנית דרכון FIRST CLASS הוא 0.01 דולר ליום (ניתן להוסיף כיסוי חבות צד שלישי בעלות 0.20 דולר ליום). **מקור**: קובץ `travel/files/תעריפון-דרכון-first-class_b0de1354.md` – מצוין תעריף של $0.01 ליום.",
       "abstention_heuristic": false,
-      "latency_seconds": 3.84,
+      "latency_seconds": 14.63,
       "judge": {
-        "correctness": "abstention",
-        "hallucination": false,
-        "has_citation": false,
-        "explanation": "The generated answer does not provide the daily rate and states lack of information, thus it abstains rather than giving the correct 2.2 USD per day."
+        "correctness": "wrong",
+        "hallucination": true,
+        "has_citation": true,
+        "explanation": "The answer states the daily rate is $0.01, which contradicts the correct rate of $2.2 per day."
       }
     }
   ]

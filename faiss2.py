@@ -1,17 +1,18 @@
 import json
 import os
+import pickle
 import re
 import faiss
 from openai import OpenAI
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_community.docstore.in_memory import InMemoryDocstore
 from langchain_community.vectorstores import FAISS
+from langchain_community.retrievers import BM25Retriever
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import TextLoader
-from langchain_core.tools import tool
 from langchain_core.messages import SystemMessage, HumanMessage
-from langchain.agents import create_agent
 from pathlib import Path
+from table_store import TableStore
 
 
 RAG_HEB_TEMPLATE = """אתה עוזר וירטואלי של קבוצת ביטוח הראל.
@@ -59,8 +60,9 @@ TOP_K = 5
 
 
 PROJECT_ROOT = Path(__file__).parent
-DATA_PREPARED_DIR = PROJECT_ROOT / "data_prepared" 
+DATA_PREPARED_DIR = PROJECT_ROOT / "data_prepared"
 FAISS_INDEX_PATH = PROJECT_ROOT / "faiss_index"
+DOCS_CACHE_PATH  = FAISS_INDEX_PATH / "docs.pkl"
 
 
 
@@ -117,9 +119,53 @@ vector_store = FAISS(
     index_to_docstore_id={},
 )
 
+_retriever = None   # set by create_or_load_faiss_index()
+_table_store = None # set by create_or_load_faiss_index()
+
+
+def _build_ensemble(docs):
+    """Return a (bm25, faiss_retriever) pair for hybrid retrieval."""
+    print(f"Building BM25 index from {len(docs)} chunks...")
+    bm25 = BM25Retriever.from_documents(docs, k=TOP_K)
+    faiss_ret = vector_store.as_retriever(search_kwargs={"k": TOP_K})
+    return bm25, faiss_ret
+
+
+def _hybrid_retrieve(retrievers, query: str) -> list:
+    """
+    Reciprocal Rank Fusion over two retrievers.
+    weights = [0.4 BM25, 0.6 FAISS] — favour semantic slightly.
+    """
+    bm25_ret, faiss_ret = retrievers
+    bm25_docs  = bm25_ret.invoke(query)
+    faiss_docs = faiss_ret.invoke(query)
+
+    RRF_K = 60
+    scores: dict[str, float] = {}
+    doc_map: dict[str, object] = {}
+
+    for rank, doc in enumerate(bm25_docs):
+        key = hash(doc.page_content)
+        scores[key] = scores.get(key, 0) + 0.4 / (RRF_K + rank + 1)
+        doc_map[key] = doc
+
+    for rank, doc in enumerate(faiss_docs):
+        key = hash(doc.page_content)
+        scores[key] = scores.get(key, 0) + 0.6 / (RRF_K + rank + 1)
+        doc_map[key] = doc
+
+    ranked = sorted(scores.keys(), key=lambda k: scores[k], reverse=True)
+    return [doc_map[k] for k in ranked[:TOP_K]]
+
 
 def create_or_load_faiss_index():
-    global vector_store
+    global vector_store, _retriever, _table_store
+    # Load structured table store if available
+    try:
+        _table_store = TableStore.load()
+    except FileNotFoundError:
+        print("Table store not found — run 'python table_store.py' to build it.")
+        _table_store = None
     if FAISS_INDEX_PATH.exists():
         print(f"Loading existing FAISS index from {FAISS_INDEX_PATH}...")
         vector_store = FAISS.load_local(
@@ -129,12 +175,19 @@ def create_or_load_faiss_index():
         )
         print("Index loaded successfully.")
 
+        if DOCS_CACHE_PATH.exists():
+            with open(DOCS_CACHE_PATH, "rb") as f:
+                cached_docs = pickle.load(f)
+            _retriever = _build_ensemble(cached_docs)
+        else:
+            print("No docs cache found — using FAISS-only retrieval. Rebuild the index to enable hybrid search.")
+            faiss_ret = vector_store.as_retriever(search_kwargs={"k": TOP_K})
+            _retriever = (None, faiss_ret)
+
     else:
         docs = []
 
-        OUTDATED_START_YEAR = 2013
-        OUTDATED_END_YEAR = 2022
-        OUTDATED_YEARS = [str(y) for y in range(OUTDATED_START_YEAR, OUTDATED_END_YEAR)]
+        OUTDATED_YEARS = [str(y) for y in range(2013, 2022)]
 
         def is_outdated(filename: str) -> bool:
             if filename.startswith("archive_"):
@@ -149,32 +202,117 @@ def create_or_load_faiss_index():
                         continue
                     print(f"Loading document: {file}".encode("utf-8", errors="replace").decode("ascii", errors="replace"))
                     path = os.path.join(root, file)
-
-                    loader = TextLoader(path, encoding="utf-8")
-
-                    docs.append(loader.load()[0])
+                    docs.append(TextLoader(path, encoding="utf-8").load()[0])
 
         text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000,  # chunk size (characters)
-            chunk_overlap=200,  # chunk overlap (characters)
-            add_start_index=True,  # track index in original document
+            chunk_size=1000,
+            chunk_overlap=200,
+            add_start_index=True,
         )
         all_splits = text_splitter.split_documents(docs)
-
         print(f"Split files into {len(all_splits)} sub-documents.")
 
         document_ids = vector_store.add_documents(
-            documents=all_splits, 
-            ids=[f"{doc.metadata['source']}_{i}" for i, doc in enumerate(all_splits)], 
-            verbose=True
+            documents=all_splits,
+            ids=[f"{doc.metadata['source']}_{i}" for i, doc in enumerate(all_splits)],
         )
-
         print(document_ids[:3])
+
         FAISS_INDEX_PATH.mkdir(parents=True, exist_ok=True)
         vector_store.save_local(str(FAISS_INDEX_PATH))
-        print(f"Index saved to {FAISS_INDEX_PATH}")
+
+        with open(DOCS_CACHE_PATH, "wb") as f:
+            pickle.dump(all_splits, f)
+        print(f"Index and docs cache saved to {FAISS_INDEX_PATH}")
+
+        _retriever = _build_ensemble(all_splits)
 
     return vector_store
+
+
+def _retrieve(query: str) -> list:
+    """Use hybrid retriever if available, otherwise fall back to FAISS-only."""
+    if _retriever is not None:
+        bm25_ret, faiss_ret = _retriever
+        if bm25_ret is not None:
+            return _hybrid_retrieve(_retriever, query)
+        return faiss_ret.invoke(query)
+    return vector_store.similarity_search(query, k=TOP_K)
+
+
+REWRITE_SYSTEM_PROMPT = """You are a search query optimizer for an Israeli insurance knowledge base.
+Given a user question in Hebrew (or English), generate 3 alternative search queries that:
+1. Use different wording / synonyms to maximise recall
+2. Mirror how insurance policy documents phrase the same concept
+3. Are concise (one line each)
+
+Return ONLY a JSON array of 3 strings. No explanation, no markdown.
+Example output: ["query 1", "query 2", "query 3"]
+"""
+
+
+def rewrite_query(question: str) -> list[str]:
+    """Generate 3 alternative phrasings of the question for better retrieval recall."""
+    try:
+        resp = _client.chat.completions.create(
+            model=LLM_MODEL,
+            messages=[
+                {"role": "system", "content": REWRITE_SYSTEM_PROMPT},
+                {"role": "user", "content": question},
+            ],
+            temperature=0.3,
+        )
+        raw = resp.choices[0].message.content.strip()
+        raw = re.sub(r"^```(?:json)?\s*", "", raw)
+        raw = re.sub(r"\s*```$", "", raw)
+        alternatives = json.loads(raw)
+        if isinstance(alternatives, list):
+            return [question] + [q for q in alternatives if isinstance(q, str)]
+    except Exception:
+        pass
+    return [question]  # fallback: original only
+
+
+# ---------------------------------------------------------------------------
+# Source quality re-ranking
+# ---------------------------------------------------------------------------
+
+# Files that are unlikely to contain the actual policy clauses we need
+_BAD_SOURCE_PREFIXES = ("index_", "faq_", "default_")
+_BAD_SOURCE_SUBSTRINGS = ("tofes", "טופס", "הצעה")
+
+# Files that ARE policy conditions (inner booklets, terms, etc.)
+_GOOD_SOURCE_SUBSTRINGS = ("pnimhoveret", "תנאי", "כתב-שירות", "גילוי-נאות", "polisa", "פוליסה")
+
+
+def _source_priority(doc) -> int:
+    """Return a priority score: higher = show first in context."""
+    fname = os.path.basename(doc.metadata.get("source", "")).lower()
+    if any(fname.startswith(p) for p in _BAD_SOURCE_PREFIXES):
+        return -1
+    if any(s in fname for s in _BAD_SOURCE_SUBSTRINGS):
+        return -1
+    if any(s in fname for s in _GOOD_SOURCE_SUBSTRINGS):
+        return 2
+    return 1
+
+
+def _rerank_by_source(docs: list) -> list:
+    """Re-rank retrieved docs: policy condition docs first, index/form pages last."""
+    return sorted(docs, key=_source_priority, reverse=True)
+
+
+def _retrieve_multi_query(queries: list[str]) -> list:
+    """Retrieve docs for each query variant using hybrid search, merge, deduplicate, and re-rank."""
+    seen = set()
+    merged = []
+    for q in queries:
+        for doc in _retrieve(q):
+            key = hash(doc.page_content)
+            if key not in seen:
+                seen.add(key)
+                merged.append(doc)
+    return _rerank_by_source(merged)
 
 
 def validate_answer(question: str, context: str, answer: str) -> dict:
@@ -200,9 +338,20 @@ def validate_answer(question: str, context: str, answer: str) -> dict:
 
 
 def answer_question(question: str) -> str:
-    """Full RAG pipeline: retrieve → generate → judge → refine/reject."""
-    # 1. Retrieve
-    docs = vector_store.similarity_search(question, k=TOP_K)
+    """Full pipeline: table lookup → rewrite → retrieve (hybrid) → generate → judge → refine/reject."""
+    # 0. Structured table lookup (fast exact answer for prices / numeric thresholds)
+    if _table_store is not None:
+        table_answer = _table_store.lookup(_client, question, LLM_MODEL)
+        if table_answer:
+            print("  [table] answered from structured store")
+            return table_answer
+
+    # 1. Query rewriting — generate alternative phrasings
+    queries = rewrite_query(question)
+    print(f"  [rewrite] {len(queries)} queries: {queries[1:]}")
+
+    # 2. Retrieve with all query variants, merge & deduplicate
+    docs = _retrieve_multi_query(queries)
     context = "\n\n".join(
         f"[Source: {doc.metadata.get('source', '')}]\n{doc.page_content}"
         for doc in docs
@@ -225,9 +374,7 @@ def answer_question(question: str) -> str:
 
     print(f"  [judge] verdict={verdict} | {judgment.get('critique', '')}")
 
-    if verdict == "approved":
-        return draft
-    elif verdict in ("hallucinated", "no_context"):
+    if verdict in ("hallucinated", "no_context"):
         return "אין לי מספיק מידע כדי לענות על שאלה זו."
     elif verdict == "incomplete":
         refined = judgment.get("refined_answer")
