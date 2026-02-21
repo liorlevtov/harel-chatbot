@@ -8,6 +8,9 @@ from langchain_community.docstore.in_memory import InMemoryDocstore
 from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import TextLoader
+from langchain_core.tools import tool
+from langchain_core.messages import SystemMessage, HumanMessage
+from langchain.agents import create_agent
 from pathlib import Path
 
 
@@ -57,7 +60,7 @@ TOP_K = 5
 
 PROJECT_ROOT = Path(__file__).parent
 DATA_PREPARED_DIR = PROJECT_ROOT / "data_prepared" 
-FAISS_INDEX_PATH = PROJECT_ROOT / "faiss_index_v2"
+FAISS_INDEX_PATH = PROJECT_ROOT / "faiss_index"
 
 
 
@@ -89,7 +92,7 @@ def _make_llm() -> ChatOpenAI:
         model=LLM_MODEL,
         openai_api_key=NEBIUS_API_KEY,
         openai_api_base=NEBIUS_BASE_URL,
-        temperature=0.1,
+        temperature=0,
     )
 model = _make_llm()
 
@@ -116,13 +119,13 @@ vector_store = FAISS(
 
 
 def create_or_load_faiss_index():
+    global vector_store
     if FAISS_INDEX_PATH.exists():
         print(f"Loading existing FAISS index from {FAISS_INDEX_PATH}...")
-        global vector_store
         vector_store = FAISS.load_local(
             str(FAISS_INDEX_PATH),
             embeddings=embeddings,
-            allow_dangerous_deserialization=True
+            allow_dangerous_deserialization=True,
         )
         print("Index loaded successfully.")
 
@@ -245,10 +248,83 @@ def run_agent():
         print(f"\n{answer}\n")
 
 
+def vector_store_retrieve(
+    vector_store: FAISS,
+    query: str,
+    k: int = 5,
+    fetch_k: int = 20,
+    score_threshold: float = 0.4,
+) -> list:
+    """
+    Search FAISS index with relevance filtering.
+
+    Fetches `fetch_k` candidates, discards any below `score_threshold`,
+    then returns the top `k` survivors (higher score = more relevant).
+    """
+    candidates = vector_store.similarity_search_with_relevance_scores(query, k=fetch_k)
+    filtered = [(doc, score) for doc, score in candidates if score >= score_threshold]
+    return filtered[:k]
+
+
+def _build_context_block(results: list, max_chars_per_chunk: int = 1500) -> str:
+    """Turn FAISS search results into a context string for the model."""
+    blocks = []
+    for i, (doc, score) in enumerate(results):
+        filename = doc.metadata.get("source", "unknown")
+        text = doc.page_content
+        if max_chars_per_chunk and len(text) > max_chars_per_chunk:
+            text = text[:max_chars_per_chunk] + "…"
+        blocks.append(f"[{i}] {filename} (score={score:.4f})\n{text}")
+    return "\n\n".join(blocks).strip()
+
+
+def ask_rag_with_manual_retrieval(
+        vector_store: FAISS,
+        min_top_score: float = 0.3,
+        k: int = 5,
+    ) -> dict:
+
+    while True:
+        question = input("\nEnter your question (or 'exit' to quit): ").strip()
+        if question.lower() in ["exit", "quit"]:
+            break
+
+        # 1) Retrieval
+        results = vector_store_retrieve(vector_store, question, k=k)
+        top_score = results[0][1] if results else None
+
+        # 2) Gate (relevance scores are in [0, 1]; higher = more similar)
+        if not results or top_score < min_top_score:
+            return {
+                "answer": "לא מצאתי מידע רלוונטי מספיק. נסה לנסח מחדש את השאלה.",
+                "top_score": top_score,
+                "used_results": [],
+            }
+
+        # 3) Generate from retrieved context
+        context = _build_context_block(results)
+        messages = [
+            SystemMessage(content=RAG_HEB_TEMPLATE),
+            HumanMessage(content=f"הקשר:\n{context}\n\nשאלה:\n{question}"),
+        ]
+        response = model.invoke(messages)
+
+        res = {
+            "answer": response.content,
+            "top_score": top_score,
+            "used_results": results,
+        }
+        print(res['answer'])
+
+
+
 def main():
     create_or_load_faiss_index()
     print("\nFAISS index is ready.\n")
-    run_agent()
+    result = ask_rag_with_manual_retrieval(vector_store)
+    print(f"Score: {result['top_score']:.4f}")
+    print(f"\nAnswer:\n{result['answer']}")
+    # run_agent()
 
 
 if __name__ == "__main__":
