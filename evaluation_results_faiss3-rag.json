@@ -1,0 +1,667 @@
+{
+  "model_name": "faiss3-rag (openai/gpt-oss-120b)",
+  "num_questions": 20,
+  "aggregates": {
+    "judge_correctness": {
+      "abstention": 13,
+      "wrong": 4,
+      "correct": 3
+    },
+    "hallucination_rate": 0.2,
+    "citation_rate": 0.45,
+    "abstention_rate": 0.65,
+    "by_domain": {
+      "דירה": {
+        "total": 7,
+        "correct": 0,
+        "abstention": 6
+      },
+      "עסקים": {
+        "total": 5,
+        "correct": 1,
+        "abstention": 2
+      },
+      "רכב": {
+        "total": 3,
+        "correct": 0,
+        "abstention": 3
+      },
+      "בריאות": {
+        "total": 3,
+        "correct": 2,
+        "abstention": 0
+      },
+      "נסיעות": {
+        "total": 2,
+        "correct": 0,
+        "abstention": 2
+      }
+    },
+    "by_question_type": {
+      "yes_no_policy": {
+        "total": 12,
+        "correct": 0,
+        "abstention": 0
+      },
+      "factual_lookup": {
+        "total": 8,
+        "correct": 3,
+        "abstention": 0
+      }
+    }
+  },
+  "per_question": [
+    {
+      "domain": "דירה",
+      "question_type": "yes_no_policy",
+      "prompt": "עבור ביטוח דירה, האם יש כיסוי למקרה נזק של מחשב נייד?",
+      "reference": "לא",
+      "generated": "אין לי מספיק מידע כדי לענות על שאלה זו.",
+      "sources": [],
+      "abstention_heuristic": false,
+      "latency_seconds": 2.74,
+      "judge": {
+        "correctness": "abstention",
+        "hallucination": false,
+        "has_citation": false,
+        "explanation": "The generated answer does not provide the factual answer (which is 'no') and instead says it lacks information, thus it is an abstention."
+      }
+    },
+    {
+      "domain": "דירה",
+      "question_type": "yes_no_policy",
+      "prompt": "האם הרחבת ביטוח הדירה שתכלול כיסוי על נזק לצמחים והשקייה דורשת תשלום נוסף?",
+      "reference": "לא",
+      "generated": "אין לי מספיק מידע במקורות שסופקו כדי לקבוע האם הרחבת ביטוח הדירה לכיסוי נזק לצמחים והשקייה דורשת תשלום נוסף.  \n\nמקורות:\n- אין במקורות המצוינים פירוט על כיסוי לצמחים או השקייה.",
+      "sources": [
+        {
+          "filepath": "data_prepared/business/files/טופס-הצעה-לביטוח-מכלול-למושב_4851be68.md",
+          "page_number": 6,
+          "domain": "business",
+          "url": "https://media.harel-group.co.il/media/tz3p013c/טופס-הצעה-לביטוח-מכלול-למושב.pdf"
+        },
+        {
+          "filepath": "data_prepared/travel/files/טופס-הצעה-לביטוח-נסיעות-לחול-דרכון-פרימיום_32de4842.md",
+          "page_number": 2,
+          "domain": "travel",
+          "url": "https://media.harel-group.co.il/media/jstbncbn/טופס-הצעה-לביטוח-נסיעות-לחול-דרכון-פרימיום.pdf"
+        },
+        {
+          "filepath": "data_prepared/mortgage/files/index_b0e2b48c.md",
+          "page_number": 0,
+          "domain": "mortgage",
+          "url": "https://www.harel-group.co.il/insurance/mortgage/policies/safe-mortgage/"
+        },
+        {
+          "filepath": "data_prepared/mortgage/files/safe-mortgage_8ff17da7.md",
+          "page_number": 0,
+          "domain": "mortgage",
+          "url": "https://www.harel-group.co.il/insurance/mortgage/policies/safe-mortgage"
+        },
+        {
+          "filepath": "data_prepared/apartment/files/טופס-הצעה-לפוליסת-ביטוח-דירה-אדירה-זהב_4dd72467.md",
+          "page_number": 2,
+          "domain": "apartment",
+          "url": "https://media.harel-group.co.il/media/k2ll2dvn/טופס-הצעה-לפוליסת-ביטוח-דירה-אדירה-זהב.pdf"
+        }
+      ],
+      "abstention_heuristic": false,
+      "latency_seconds": 3.66,
+      "judge": {
+        "correctness": "abstention",
+        "hallucination": false,
+        "has_citation": true,
+        "explanation": "The answer says it lacks sufficient information and does not provide the correct 'no' response, thus it abstains; it does not assert false facts and includes a citation note."
+      }
+    },
+    {
+      "domain": "דירה",
+      "question_type": "factual_lookup",
+      "prompt": "מתי דירה נחשבת לא תפוסה?",
+      "reference": "דירה הפנויה למעלה מ-60 ימים רצופים, או שבפועל לא התגוררו בה באופן סדיר למעלה מ-60 ימים רצופים נחשבת לא תפוסה.",
+      "generated": "אין לי מספיק מידע כדי לענות על שאלה זו.",
+      "sources": [],
+      "abstention_heuristic": false,
+      "latency_seconds": 4.34,
+      "judge": {
+        "correctness": "abstention",
+        "hallucination": false,
+        "has_citation": false,
+        "explanation": "The generated answer declines to answer, providing no factual information, thus it is an abstention and not a correct or incorrect response."
+      }
+    },
+    {
+      "domain": "דירה",
+      "question_type": "yes_no_policy",
+      "prompt": "האם הביטוח מכסה נזק לדירה שנגרם כתוצאה מפגיעת ברק?",
+      "reference": "כן",
+      "generated": "אין לי מספיק מידע כדי לענות על שאלה זו.",
+      "sources": [],
+      "abstention_heuristic": false,
+      "latency_seconds": 2.45,
+      "judge": {
+        "correctness": "abstention",
+        "hallucination": false,
+        "has_citation": false,
+        "explanation": "The generated answer declines to answer, whereas the reference states the answer is 'yes', so it does not provide the correct information."
+      }
+    },
+    {
+      "domain": "דירה",
+      "question_type": "yes_no_policy",
+      "prompt": "האם הביטוח מכסה מקרה של גניבת אופניים חשמליים שהיו נעולים מחוץ לדירה המבוטחת?",
+      "reference": "לא, רק עבור אופניים ללא מנוע עזר",
+      "generated": "אין לי מספיק מידע כדי לענות על שאלה זו.",
+      "sources": [],
+      "abstention_heuristic": false,
+      "latency_seconds": 5.3,
+      "judge": {
+        "correctness": "abstention",
+        "hallucination": false,
+        "has_citation": false,
+        "explanation": "The generated answer declines to answer, providing no factual content, thus it is an abstention."
+      }
+    },
+    {
+      "domain": "דירה",
+      "question_type": "yes_no_policy",
+      "prompt": "יש לי ביטוח דירה, ועל הגג ישנו דוד שמש בנפח 300 ליטר. נגרם נזק לאחרונה, האם אני מכוסה על הנזק במקרה הזה?",
+      "reference": "לא, הביטוח לא חל על דוד שנפחו מעל 200 ליטר",
+      "generated": "אין לי מספיק מידע כדי לענות על שאלה זו.",
+      "sources": [],
+      "abstention_heuristic": false,
+      "latency_seconds": 7.85,
+      "judge": {
+        "correctness": "abstention",
+        "hallucination": false,
+        "has_citation": false,
+        "explanation": "The generated answer declines to answer, providing no factual information, thus it is an abstention and not a hallucination."
+      }
+    },
+    {
+      "domain": "דירה",
+      "question_type": "yes_no_policy",
+      "prompt": "אני מבוטח אצלכם בביטוח דירה, והחלה רטיבות בתקרה שנגרמת כנראה ממי גשמים שנספגים בה. אני זכאי לכיסוי על מקרה כזה?",
+      "reference": "לא",
+      "generated": "הכיסוי למקרה של רטיבות בתקרה תלוי אם ברשימת הכיסויים שבפוליסה נרכש **כיסוי נזקי מים**.  \n\n- בטופס ההצעה למכלול למושב מצוין כי נזקי רטיבות למבנה כתוצאה מאיטום לקוי מכוסים **רק אם נרכש כיסוי נזקי מים** על‑ידי בעל‑מקצוע מטעם חברת הביטוח【מקור: טופס-הצעה-לביטוח-מכלול-למושב_4851be68.md, עמוד 6】.  \n- בנספח לחידוש פוליסת דירה (נזקי מים) ניתן לבחור בין אפשרויות שיפוי שונות למקרה של נזקי מים, מה שמצביע שהכיסוי קיים רק במידה והמבוטח בחר באפשרות זו【מקור: נספח-לחידוש-פוליסת-ביטוח-דירה-אדירה-זהב-עבור-נזקי-מים_81dedddd.md, עמוד 1】.\n\nלכן, אם ברשימת הכיסויים שלך נכלל **כיסוי נזקי מים** (או “נזקי רטיבות למבנה”), ייתכן ותהיה זכאי לשיפוי על הרטיבות שנגרמה ממי גשמים שנספגים בתקרה. אם לא נרכש כיסוי זה, הפוליסה אינה מכסה את הנזק.  \n\n**מה לעשות:**  \n1. בדוק את הפוליסה שלך – האם יש סעיף “כיסוי נזקי מים/רטיבות”.  \n2. אם הכיסוי קיים, פנה לסוכן או למוקד שירות של הראל והגש תביעה בהתאם להוראות השיפוי (לדוגמה, בחירת בעל‑מקצוע לתיקון וקבלת שיפוי כספי).  \n\nמקורות:  \n- קובץ: טופס-הצעה-לביטוח-מכלול-למושב_4851be68.md, עמוד: 6  \n- קובץ: נספח-לחידוש-פוליסת-ביטוח-דירה-אדירה-זהב-עבור-נזקי-מים_81dedddd.md, עמוד: 1",
+      "sources": [
+        {
+          "filepath": "data_prepared/apartment/files/index_0cf2e698.md",
+          "page_number": 0,
+          "domain": "apartment",
+          "url": "https://www.harel-group.co.il/insurance/apartment/information/faq/"
+        },
+        {
+          "filepath": "data_prepared/apartment/files/faq_612d23de.md",
+          "page_number": 0,
+          "domain": "apartment",
+          "url": "https://www.harel-group.co.il/insurance/apartment/information/faq"
+        },
+        {
+          "filepath": "data_prepared/business/files/טופס-הצעה-לביטוח-מכלול-למושב_4851be68.md",
+          "page_number": 6,
+          "domain": "business",
+          "url": "https://media.harel-group.co.il/media/tz3p013c/טופס-הצעה-לביטוח-מכלול-למושב.pdf"
+        },
+        {
+          "filepath": "data_prepared/apartment/files/נספח-לחידוש-פוליסת-ביטוח-דירה-אדירה-זהב-עבור-נזקי-מים_81dedddd.md",
+          "page_number": 1,
+          "domain": "apartment",
+          "url": "https://media.harel-group.co.il/media/3vdld1go/נספח-לחידוש-פוליסת-ביטוח-דירה-אדירה-זהב-עבור-נזקי-מים.pdf"
+        }
+      ],
+      "abstention_heuristic": false,
+      "latency_seconds": 5.75,
+      "judge": {
+        "correctness": "wrong",
+        "hallucination": true,
+        "has_citation": true,
+        "explanation": "The reference answer says unequivocally 'No', while the generated answer suggests coverage may be possible if a water‑damage rider was purchased, contradicting the ground truth."
+      }
+    },
+    {
+      "domain": "עסקים",
+      "question_type": "factual_lookup",
+      "prompt": "מהי תקופת ההתיישנות של תביעה לתגמולי ביטוח?",
+      "reference": "שלוש שנים מיום קרות מקרה הביטוח.",
+      "generated": "תקופת ההתיישנות של תביעה לתגמולי ביטוח היא שלוש שנים מיום קרות מקרה הביטוח.\n\nמקורות:\n- קובץ: נזקי-טרור-מעל-מס-רכוש-לתעשייה-ינואר-2023_9076793c.md, עמוד: 13",
+      "sources": [
+        {
+          "filepath": "data_prepared/general/files/נזקי-טרור-מעל-מס-רכוש-לתעשייה-ינואר-2023_9076793c.md",
+          "page_number": 13,
+          "domain": "general",
+          "url": "https://media.harel-group.co.il/media/w5ad4t1h/נזקי-טרור-מעל-מס-רכוש-לתעשייה-ינואר-2023.pdf"
+        },
+        {
+          "filepath": "data_prepared/general/files/34633.13_pnimhoveret_d_sofi_mail_טרור_9eacdc47.md",
+          "page_number": 13,
+          "domain": "general",
+          "url": "https://www.harel-group.co.il/Policies/34633.13_pnimhoveret_d_sofi_mail_טרור.pdf"
+        },
+        {
+          "filepath": "data_prepared/general/files/פוליסה_לביטוח_נזקי_טרור_(מעל_מס_רכוש)_0dba5a89.md",
+          "page_number": 14,
+          "domain": "general",
+          "url": "https://www.harel-group.co.il/Policies/פוליסה לביטוח נזקי טרור (מעל מס רכוש).pdf"
+        },
+        {
+          "filepath": "data_prepared/general/files/פוליסה-לביטוח-רכוש-בכספת-מהדורת-ינואר-2023_e4a67a7b.md",
+          "page_number": 12,
+          "domain": "general",
+          "url": "https://d1i0hy0ksitt1q.cloudfront.net/media/xrybhmp4/%D7%A4%D7%95%D7%9C%D7%99%D7%A1%D7%94-%D7%9C%D7%91%D7%99%D7%98%D7%95%D7%97-%D7%A8%D7%9B%D7%95%D7%A9-%D7%91%D7%9B%D7%A1%D7%A4%D7%AA-%D7%9E%D7%94%D7%93%D7%95%D7%A8%D7%AA-%D7%99%D7%A0%D7%95%D7%90%D7%A8-2023.pdf"
+        },
+        {
+          "filepath": "data_prepared/general/files/פוליסה-לביטוח-רכוש-בכספת-מהדורת-ינואר-2023_b6b81ff9.md",
+          "page_number": 12,
+          "domain": "general",
+          "url": "https://media.harel-group.co.il/media/xrybhmp4/פוליסה-לביטוח-רכוש-בכספת-מהדורת-ינואר-2023.pdf"
+        }
+      ],
+      "abstention_heuristic": false,
+      "latency_seconds": 2.72,
+      "judge": {
+        "correctness": "correct",
+        "hallucination": false,
+        "has_citation": true,
+        "explanation": "The answer matches the reference statement exactly and adds a citation, which does not contradict the reference."
+      }
+    },
+    {
+      "domain": "עסקים",
+      "question_type": "yes_no_policy",
+      "prompt": "אני מבוטח אצלכם בפוליסה לביטוח אבדן רישיון רופא, והתחילו נגדי תהליכים משפטיים לשלילת הרשיון – האם הביטוח מכסה את ההוצאות המשפטיות?",
+      "reference": "כן",
+      "generated": "הביטוח לאבדן רישיון רופא אינו כולל אוטומטית כיסוי להוצאות משפטיות – הוא מציע אפשרות להרחיב את הפוליסה כך שתכלול כיסוי של הוצאות משפט בהליכים פליליים, עד גבול של 100,000 ש״ח לכל תקופת הביטוח. אם בחרת באפשרות זו, ההוצאות המשפטיות הקשורות לתהליכים של שלילת הרישיון יכוסו עד הסכום המוגדר; אחרת, ההוצאות אינן מכוסות.  \n\nמקורות:  \n- 22247_tofes_22530a_sofi_mail_7543580d.md, עמוד 2.",
+      "sources": [
+        {
+          "filepath": "data_prepared/general/files/22307_pnimhaim_22308c_sofi_mail_585ca512.md",
+          "page_number": 2,
+          "domain": "general",
+          "url": "https://media.harel-group.co.il/media/letjtheq/22307_pnimhaim_22308c_sofi_mail.pdf"
+        },
+        {
+          "filepath": "data_prepared/general/files/22307_pnimhaim_22308c_sofi_mail_583ea8e9.md",
+          "page_number": 2,
+          "domain": "general",
+          "url": "https://d1i0hy0ksitt1q.cloudfront.net/media/letjtheq/22307_pnimhaim_22308c_sofi_mail.pdf"
+        },
+        {
+          "filepath": "data_prepared/general/files/22247_tofes_22530a_sofi_mail_7543580d.md",
+          "page_number": 2,
+          "domain": "general",
+          "url": "https://media.harel-group.co.il/media/bycbgako/22247_tofes_22530a_sofi_mail.pdf"
+        },
+        {
+          "filepath": "data_prepared/dental/files/טופס-הצעה-לביטוח-אחריות-מקצועית-לרופא-שיניים_9bba0bcf.md",
+          "page_number": 3,
+          "domain": "dental",
+          "url": "https://media.harel-group.co.il/media/h0cd5kch/טופס-הצעה-לביטוח-אחריות-מקצועית-לרופא-שיניים.pdf"
+        }
+      ],
+      "abstention_heuristic": false,
+      "latency_seconds": 5.07,
+      "judge": {
+        "correctness": "wrong",
+        "hallucination": true,
+        "has_citation": true,
+        "explanation": "The generated answer says coverage is not automatic and only optional, contradicting the reference answer which states coverage is provided."
+      }
+    },
+    {
+      "domain": "עסקים",
+      "question_type": "factual_lookup",
+      "prompt": "מהו מספר הטלפון של מוקד תביעות ביטוח כללי של הראל?",
+      "reference": "03-9294000",
+      "generated": "לפי המסמכים של הראל, קיימים שני מספרי טלפון למוקד תביעות ביטוח כללי:\n- 03‑9291000 – מופיע בפוליסה לביטוח כספים (קובץ: פוליסה-לביטוח-כספים-הראל-ביט-ינואר-2023_2a3d8d19, עמוד: 14; קובץ: פוליסה-לביטוח-כספים-הראל-ביט-ינואר-2023_477dd774, עמוד: 14).\n- 03‑9294000 – מופיע בתנאי פוליסות משכנתה, ביטוח עסקי רכב וביטוח רכוש (קובץ: תנאי-פוליסת-משכנתה-בטוחה-ב_1605f610, עמוד: 12; קובץ: תנאי-פוליסת-ביטוח-עסקי-רכוש-בכספת_775c0954, עמוד: 15; קובץ: תנאי-פוליסת-ביטוח-רכוש-כל-הסיכונים-לדברי-ערך_e189771c, עמוד: 12).",
+      "sources": [
+        {
+          "filepath": "data_prepared/general/files/פוליסה-לביטוח-כספים-הראל-ביט-ינואר-2023_2a3d8d19.md",
+          "page_number": 14,
+          "domain": "general",
+          "url": "https://d1i0hy0ksitt1q.cloudfront.net/media/k35jwdk3/%D7%A4%D7%95%D7%9C%D7%99%D7%A1%D7%94-%D7%9C%D7%91%D7%99%D7%98%D7%95%D7%97-%D7%9B%D7%A1%D7%A4%D7%99%D7%9D-%D7%94%D7%A8%D7%90%D7%9C-%D7%91%D7%99%D7%98-%D7%99%D7%A0%D7%95%D7%90%D7%A8-2023.pdf"
+        },
+        {
+          "filepath": "data_prepared/general/files/פוליסה-לביטוח-כספים-הראל-ביט-ינואר-2023_477dd774.md",
+          "page_number": 14,
+          "domain": "general",
+          "url": "https://media.harel-group.co.il/media/k35jwdk3/פוליסה-לביטוח-כספים-הראל-ביט-ינואר-2023.pdf"
+        },
+        {
+          "filepath": "data_prepared/general/files/תנאי-פוליסת-משכנתה-בטוחה-ב_1605f610.md",
+          "page_number": 12,
+          "domain": "general",
+          "url": "https://media.harel-group.co.il/media/ve2l1l2w/תנאי-פוליסת-משכנתה-בטוחה-ב.pdf"
+        },
+        {
+          "filepath": "data_prepared/business/files/תנאי-פוליסת-ביטוח-עסקי-רכוש-בכספת_775c0954.md",
+          "page_number": 15,
+          "domain": "business",
+          "url": "https://media.harel-group.co.il/media/ehxncyml/תנאי-פוליסת-ביטוח-עסקי-רכוש-בכספת.pdf"
+        },
+        {
+          "filepath": "data_prepared/general/files/תנאי-פוליסת-ביטוח-רכוש-כל-הסיכונים-לדברי-ערך_e189771c.md",
+          "page_number": 12,
+          "domain": "general",
+          "url": "https://media.harel-group.co.il/media/f5ih1qci/תנאי-פוליסת-ביטוח-רכוש-כל-הסיכונים-לדברי-ערך.pdf"
+        }
+      ],
+      "abstention_heuristic": false,
+      "latency_seconds": 6.78,
+      "judge": {
+        "correctness": "wrong",
+        "hallucination": true,
+        "has_citation": true,
+        "explanation": "The answer includes an extra phone number (03‑9291000) not present in the reference, providing incorrect information despite citing sources."
+      }
+    },
+    {
+      "domain": "עסקים",
+      "question_type": "yes_no_policy",
+      "prompt": "אני מבוטח אצלכם בפוליסת מכלול לחבר מושב, האם אני מכוסה במקרה של נזק כתוצאה משקיעת קרקע בשטח החקלאי?",
+      "reference": "לא",
+      "generated": "אין לי מספיק מידע כדי לענות על שאלה זו.",
+      "sources": [],
+      "abstention_heuristic": false,
+      "latency_seconds": 2.88,
+      "judge": {
+        "correctness": "abstention",
+        "hallucination": false,
+        "has_citation": false,
+        "explanation": "The generated answer declines to answer, saying it lacks information, instead of providing the correct 'No' response."
+      }
+    },
+    {
+      "domain": "עסקים",
+      "question_type": "yes_no_policy",
+      "prompt": "אני מבוטח בפוליסת מכלול למושב. יש בשטח שלי מבנה שעשוי מלוחות אסבסט, האם הוא נחשב \"מבנה מסיבי\"?",
+      "reference": "כן",
+      "generated": "אין לי מספיק מידע כדי לענות על שאלה זו.",
+      "sources": [],
+      "abstention_heuristic": false,
+      "latency_seconds": 3.91,
+      "judge": {
+        "correctness": "abstention",
+        "hallucination": false,
+        "has_citation": false,
+        "explanation": "The generated answer declines to answer, whereas the reference answer is a definitive 'yes'."
+      }
+    },
+    {
+      "domain": "רכב",
+      "question_type": "yes_no_policy",
+      "prompt": "אני מבוטח בהראל בפוליסה לביטוח צ.מ.ה. מכלי דלק שברשותי ניזוקו וכל הדלק שהיה בהם נזל ואבד, האם אני מכוסה על מחיר הדלק שאבד?",
+      "reference": "לא",
+      "generated": "אין לי מספיק מידע כדי לענות על שאלה זו.",
+      "sources": [],
+      "abstention_heuristic": false,
+      "latency_seconds": 2.65,
+      "judge": {
+        "correctness": "abstention",
+        "hallucination": false,
+        "has_citation": false,
+        "explanation": "The generated answer declines to answer, whereas the reference answer is a definitive 'No', so it does not provide the correct information."
+      }
+    },
+    {
+      "domain": "רכב",
+      "question_type": "factual_lookup",
+      "prompt": "מהי תקופת ההתיישנות של תביעה מכוח פוליסת ביטוח \"תו סוחר\" - רכב חובה?",
+      "reference": "שבע שנים",
+      "generated": "אין לי מספיק מידע במקורות שסופקו כדי לקבוע את תקופת ההתיישנות של תביעה לפי פוליסת “תו סוחר” – רכב חובה.\n\nמקורות:  \n- (אין)",
+      "sources": [
+        {
+          "filepath": "data_prepared/general/files/פוליסה-לביטוח-עבודות-קבלניות-הראל-ביט-מהדורת-ינואר-2023_8b1c3b53.md",
+          "page_number": 32,
+          "domain": "general",
+          "url": "https://media.harel-group.co.il/media/y0ndjhi4/פוליסה-לביטוח-עבודות-קבלניות-הראל-ביט-מהדורת-ינואר-2023.pdf"
+        },
+        {
+          "filepath": "data_prepared/dental/files/תנאי_הפוליסה_לביטוח_עסקי_-_אחריות_מקצועית_לרופאי_שיניים_26684b0c.md",
+          "page_number": 19,
+          "domain": "dental",
+          "url": "https://www.harel-group.co.il/Policies/תנאי הפוליסה לביטוח עסקי - אחריות מקצועית לרופאי שיניים.pdf"
+        },
+        {
+          "filepath": "data_prepared/apartment/files/תנאי-פוליסת-ביטוח-דירה-אדירה-כסף-מהדורת-פברואר-2025_fd938803.md",
+          "page_number": 33,
+          "domain": "apartment",
+          "url": "https://media.harel-group.co.il/media/wdvn2ej1/תנאי-פוליסת-ביטוח-דירה-אדירה-כסף-מהדורת-פברואר-2025.pdf"
+        },
+        {
+          "filepath": "data_prepared/apartment/files/תנאי_פוליסת_ביטוח_דירה_אדירה_כסף-_מהדורת_נובמבר_2023_8509a2b4.md",
+          "page_number": 31,
+          "domain": "apartment",
+          "url": "https://www.harel-group.co.il/Policies/תנאי פוליסת ביטוח דירה אדירה כסף- מהדורת נובמבר 2023.pdf"
+        },
+        {
+          "filepath": "data_prepared/general/files/תנאי-הכנסה-למשפחה_c01aaa1d.md",
+          "page_number": 12,
+          "domain": "general",
+          "url": "https://media.harel-group.co.il/media/fajl13f4/תנאי-הכנסה-למשפחה.pdf"
+        }
+      ],
+      "abstention_heuristic": false,
+      "latency_seconds": 3.35,
+      "judge": {
+        "correctness": "abstention",
+        "hallucination": false,
+        "has_citation": false,
+        "explanation": "The answer refuses to provide the period, whereas the reference states it is seven years."
+      }
+    },
+    {
+      "domain": "רכב",
+      "question_type": "yes_no_policy",
+      "prompt": "אני מבוטח בהראל בפוליסה לביטוח צ.מ.ה. השתמשתי במנוע של כלי מבוטח כדי להפעיל את המצבר של רכב אחר של העסק שלי, ונגרם נזק לכלי המבוטח. האם אני זכאי לכיסוי על הנזק במקרה כזה?",
+      "reference": "לא",
+      "generated": "אין לי מספיק מידע כדי לענות על שאלה זו.",
+      "sources": [],
+      "abstention_heuristic": false,
+      "latency_seconds": 3.46,
+      "judge": {
+        "correctness": "abstention",
+        "hallucination": false,
+        "has_citation": false,
+        "explanation": "The generated answer declines to answer, providing no factual response, thus it is an abstention and does not match the reference answer."
+      }
+    },
+    {
+      "domain": "בריאות",
+      "question_type": "factual_lookup",
+      "prompt": "מה המחיר ההשתתפות העצמית של טיפול רופא בביקור בית?",
+      "reference": "25 שקלים",
+      "generated": "המחיר של השתתפות עצמית עבור טיפול רופא בביקור בית הוא **25 ש״ח**.\n\nמקורות:\n- קובץ: 2654_2f85b065.md, עמוד: 39  \n- קובץ: 1861_505bbe30.md, עמוד: 28  \n- קובץ: 2028_bc1db26b.md, עמוד: 31",
+      "sources": [
+        {
+          "filepath": "data_prepared/general/files/2654_2f85b065.md",
+          "page_number": 39,
+          "domain": "general",
+          "url": "https://www.harel-group.co.il/Policies/2654.pdf"
+        },
+        {
+          "filepath": "data_prepared/general/files/1861_505bbe30.md",
+          "page_number": 28,
+          "domain": "general",
+          "url": "https://www.harel-group.co.il/Policies/1861.pdf"
+        },
+        {
+          "filepath": "data_prepared/general/files/private-062011_d17d4307.md",
+          "page_number": 5,
+          "domain": "general",
+          "url": "https://www.harel-group.co.il/Policies/private-062011.pdf"
+        },
+        {
+          "filepath": "data_prepared/general/files/טופס-בקשה-לאישור-ותיאום-ניתוח_54538b76.md",
+          "page_number": 3,
+          "domain": "general",
+          "url": "https://media.harel-group.co.il/media/judnrjdo/טופס-בקשה-לאישור-ותיאום-ניתוח.pdf"
+        },
+        {
+          "filepath": "data_prepared/general/files/2028_bc1db26b.md",
+          "page_number": 31,
+          "domain": "general",
+          "url": "https://www.harel-group.co.il/Policies/2028.pdf"
+        }
+      ],
+      "abstention_heuristic": false,
+      "latency_seconds": 3.82,
+      "judge": {
+        "correctness": "correct",
+        "hallucination": false,
+        "has_citation": true,
+        "explanation": "The answer states the same amount (25 ₪) as the reference and adds citation references, with no contradictory information."
+      }
+    },
+    {
+      "domain": "בריאות",
+      "question_type": "factual_lookup",
+      "prompt": "אני מנוי ברפואה אישית און ליין פלוס - מה המחיר ההשתתפות העצמית של ייעוץ פסיכולוגי מקוון?",
+      "reference": "100 שקל לכל ייעוץ",
+      "generated": "המחיר של ההשתתפות העצמית עבור ייעוץ פסיכולוגי מקוון הוא **100 ש״ח**.\n\nמקורות:\n- כתב-שירות-רפואה-אישית-onlineplus_b6e22c8f.md, עמוד 4.",
+      "sources": [
+        {
+          "filepath": "data_prepared/health/files/כתב-שירות-רפואה-אישית-onlineplus_b6e22c8f.md",
+          "page_number": 4,
+          "domain": "health",
+          "url": "https://media.harel-group.co.il/media/4mxdtnu0/כתב-שירות-רפואה-אישית-onlineplus.pdf"
+        },
+        {
+          "filepath": "data_prepared/car/files/תנאי-פוליסת-ביטוח-לתיירים-tour-and-care-בעברית_7bd16c08.md",
+          "page_number": 32,
+          "domain": "car",
+          "url": "https://media.harel-group.co.il/media/izrprnwb/תנאי-פוליסת-ביטוח-לתיירים-tour-and-care-בעברית.pdf"
+        },
+        {
+          "filepath": "data_prepared/car/files/תנאי-פוליסת-ביטוח-לתיירים-tour-and-care-בעברית_7808f6f1.md",
+          "page_number": 32,
+          "domain": "car",
+          "url": "https://d1i0hy0ksitt1q.cloudfront.net/media/izrprnwb/%D7%AA%D7%A0%D7%90%D7%99-%D7%A4%D7%95%D7%9C%D7%99%D7%A1%D7%AA-%D7%91%D7%99%D7%98%D7%95%D7%97-%D7%9C%D7%AA%D7%99%D7%99%D7%A8%D7%99%D7%9D-tour-and-care-%D7%91%D7%A2%D7%91%D7%A8%D7%99%D7%AA.pdf"
+        },
+        {
+          "filepath": "data_prepared/health/files/דפי-עזר-לשימוש-בשירות-רפואה-אישית-on-line_52c1d68e.md",
+          "page_number": 3,
+          "domain": "health",
+          "url": "https://media.harel-group.co.il/media/zh2bpwy1/דפי-עזר-לשימוש-בשירות-רפואה-אישית-on-line.pdf"
+        },
+        {
+          "filepath": "data_prepared/health/files/כתב_שירות_-_רפואה_אישית_On-line_d540ca7a.md",
+          "page_number": 4,
+          "domain": "health",
+          "url": "https://www.harel-group.co.il/Policies/כתב שירות - רפואה אישית On-line.pdf"
+        }
+      ],
+      "abstention_heuristic": false,
+      "latency_seconds": 2.91,
+      "judge": {
+        "correctness": "correct",
+        "hallucination": false,
+        "has_citation": true,
+        "explanation": "The answer states the same amount (100 ₪) as the reference and adds a citation, with no contradictory information."
+      }
+    },
+    {
+      "domain": "בריאות",
+      "question_type": "factual_lookup",
+      "prompt": "בני מבוטח אצלכם בתוכנית ביטוח לניתוחים וטיפולים מחליפי ניתוח בישראל – שקל ראשון. הוא בן 14, מהי עלות הביטוח החודשית עבורו?",
+      "reference": "38.27 שקלים לחודש",
+      "generated": "הפרמיה החודשית לילד בן 14 בתוכנית \"ביטוח ניתוחים משלים שב\"ן וטיפולים מחליפי ניתוח בישראל – שקל ראשון\" היא כ‑174.80 ש״ח. המספר מופיע בטבלת דמי הביטוח לילדים (38.27, 72.02, 126.17, **174.80**, 278.06, 329.64, 476.88, 712.81) [מקור: גילוי-נאות-upgrade-אקסטרה-ניתוחים-וטיפולים-מחליפי-ניתוח-בישראל_043109c0.md, עמוד 3].",
+      "sources": [
+        {
+          "filepath": "data_prepared/general/files/גילוי-נאות-upgrade-אקסטרה-ניתוחים-וטיפולים-מחליפי-ניתוח-בישראל_043109c0.md",
+          "page_number": 3,
+          "domain": "general",
+          "url": "https://media.harel-group.co.il/media/tv3pdrrk/גילוי-נאות-upgrade-אקסטרה-ניתוחים-וטיפולים-מחליפי-ניתוח-בישראל.pdf"
+        },
+        {
+          "filepath": "data_prepared/general/files/גילוי-נאות-לניתוחים-upgrade_7646944c.md",
+          "page_number": 3,
+          "domain": "general",
+          "url": "https://media.harel-group.co.il/media/5t0kwvu4/גילוי-נאות-לניתוחים-upgrade.pdf"
+        },
+        {
+          "filepath": "data_prepared/health/files/תנאי_פוליסה_לניתוחים_Upgrade_כיסוי_משלים_שבן_לניתוחים_ולטיפולים_מחליפי_ניתוח_בישראל_47ba960f.md",
+          "page_number": 8,
+          "domain": "health",
+          "url": "https://www.harel-group.co.il/insurance/health/policies/doclib/basic-covers/%D7%AA%D7%A0%D7%90%D7%99%20%D7%A4%D7%95%D7%9C%D7%99%D7%A1%D7%94%20%D7%9C%D7%A0%D7%99%D7%AA%D7%95%D7%97%D7%99%D7%9D%20Upgrade%20%D7%9B%D7%99%D7%A1%D7%95%D7%99%20%D7%9E%D7%A9%D7%9C%D7%99%D7%9D%20%D7%A9%D7%91%D7%9F%20%D7%9C%D7%A0%D7%99%D7%AA%D7%95%D7%97%D7%99%D7%9D%20%D7%95%D7%9C%D7%98%D7%99%D7%A4%D7%95%D7%9C%D7%99%D7%9D%20%D7%9E%D7%97%D7%9C%D7%99%D7%A4%D7%99%20%D7%A0%D7%99%D7%AA%D7%95%D7%97%20%D7%91%D7%99%D7%A9%D7%A8%D7%90%D7%9C.pdf"
+        },
+        {
+          "filepath": "data_prepared/general/files/תנאי_תוכנית_ניתוחים_Upgrade_-_כיסוי_משלים_שבן_לניתוחים_ולטיפולים_מחליפי_ניתוח_בישראל_-_ללא_השתתפות_עצמית_0fffab80.md",
+          "page_number": 8,
+          "domain": "general",
+          "url": "https://www.harel-group.co.il/Policies/תנאי תוכנית ניתוחים Upgrade - כיסוי משלים שבן לניתוחים ולטיפולים מחליפי ניתוח בישראל - ללא השתתפות עצמית.pdf"
+        },
+        {
+          "filepath": "data_prepared/general/files/תנאי-פוליסה-לניתוחים-upgrade_5d66c33a.md",
+          "page_number": 8,
+          "domain": "general",
+          "url": "https://media.harel-group.co.il/media/34imdzjq/תנאי-פוליסה-לניתוחים-upgrade.pdf"
+        }
+      ],
+      "abstention_heuristic": false,
+      "latency_seconds": 6.95,
+      "judge": {
+        "correctness": "wrong",
+        "hallucination": true,
+        "has_citation": true,
+        "explanation": "The answer states the premium is 174.80 ₪, which contradicts the correct amount of 38.27 ₪ given in the reference."
+      }
+    },
+    {
+      "domain": "נסיעות",
+      "question_type": "yes_no_policy",
+      "prompt": "אני בן 23 וטס לשנה וחצי של טיול בארצות הברית, האם אוכל להיות מבוטח אצלכם בתוכנית דרכון FIRST CLASS לכל אורך התקופה?",
+      "reference": "לא, יש מגבלה של עד 365 ימים",
+      "generated": "אין לי מספיק מידע כדי לענות על שאלה זו.",
+      "sources": [],
+      "abstention_heuristic": false,
+      "latency_seconds": 3.8,
+      "judge": {
+        "correctness": "abstention",
+        "hallucination": false,
+        "has_citation": false,
+        "explanation": "The generated answer does not provide any factual response, simply stating insufficient information, which is an abstention and does not match the reference answer."
+      }
+    },
+    {
+      "domain": "נסיעות",
+      "question_type": "factual_lookup",
+      "prompt": "אני בן 31 וטס בקרוב להודו, אני מתכנן לקנות ביטוח אצלכם בתוכנית דרכון FIRST CLASS. מה יהיה התעריף היומי של הפוליסה הבסיסית אצלכם?",
+      "reference": "2.2 דולר ליום",
+      "generated": "אין לי מספיק מידע במקורות שסופקו כדי לקבוע את התעריף היומי של הפוליסה הבסיסית עבור גיל 31 לנסיעה להודו בתוכנית דרכון FIRST CLASS.\n\nמקורות:\n- אין במקורות המצוינים פרטים על תעריפים ספציפיים.",
+      "sources": [
+        {
+          "filepath": "data_prepared/travel/files/index_bc97d713.md",
+          "page_number": 0,
+          "domain": "travel",
+          "url": "https://www.harel-group.co.il/insurance/travel/information/faq/"
+        },
+        {
+          "filepath": "data_prepared/travel/files/faq_ed686fcc.md",
+          "page_number": 0,
+          "domain": "travel",
+          "url": "https://www.harel-group.co.il/insurance/travel/information/faq"
+        },
+        {
+          "filepath": "data_prepared/travel/files/index_16ae8f9c.md",
+          "page_number": 0,
+          "domain": "travel",
+          "url": "https://www.harel-group.co.il/insurance/travel/policies/first-class/"
+        },
+        {
+          "filepath": "data_prepared/travel/files/first-class_63972822.md",
+          "page_number": 0,
+          "domain": "travel",
+          "url": "https://www.harel-group.co.il/insurance/travel/policies/first-class"
+        }
+      ],
+      "abstention_heuristic": false,
+      "latency_seconds": 2.56,
+      "judge": {
+        "correctness": "abstention",
+        "hallucination": false,
+        "has_citation": true,
+        "explanation": "The answer says it lacks information and does not provide the 2.2 USD/day rate, thus it abstains; it does not assert false facts, and it includes a sources section."
+      }
+    }
+  ]
+}

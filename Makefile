@@ -1,4 +1,4 @@
-.PHONY: install install-docling install-vector run-scrape run-prep-data scrape clean help milvus-start milvus-stop ingest run-chat
+.PHONY: install install-docling install-vector run-scrape run-prep-data scrape clean help milvus-start milvus-stop ingest build-faiss3 run-chat
 
 VENV := .venv
 UV := uv
@@ -16,10 +16,11 @@ help:
 	@echo "  make install-docling Install docling for data preparation"
 	@echo "  make install-vector  Install vector database dependencies"
 	@echo "  make run-scrape      Run the scraper (downloads documents)"
-	@echo "  make run-prep-data   Run data preparation (converts to markdown)"
+	@echo "  make run-prep-data   Run data preparation (converts to markdown + chunks)"
 	@echo "  make milvus-start    Start Milvus vector database (Docker)"
 	@echo "  make milvus-stop     Stop Milvus vector database"
 	@echo "  make ingest          Insert data into vector database"
+	@echo "  make build-faiss3    Build v3 FAISS index (structure-aware + page numbers)"
 	@echo "  make clean           Remove downloaded and prepared data"
 	@echo "  make run-chat        Start chat UI + API server on port 8000"
 	@echo ""
@@ -85,6 +86,10 @@ milvus-stop:
 
 ingest: install-vector
 	$(PYTHON) -m vector_db.ingest
+
+# FAISS v3 index (reads pre-computed chunks from data_prep)
+build-faiss3:
+	$(PYTHON) faiss3.py
 
 # Chat UI
 run-chat:

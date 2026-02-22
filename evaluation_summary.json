@@ -343,5 +343,28 @@
       "yes_no_policy": "5/12",
       "factual_lookup": "5/8"
     }
+  },
+  {
+    "timestamp": "2026-02-22 09:00",
+    "label": "faiss3 docling run",
+    "model": "openai/gpt-oss-120b",
+    "correct": 3,
+    "partially_correct": 0,
+    "wrong": 4,
+    "abstention": 13,
+    "accuracy": "15%",
+    "hallucination_rate": "20%",
+    "citation_rate": "45%",
+    "by_domain": {
+      "דירה": "0/7",
+      "עסקים": "1/5",
+      "רכב": "0/3",
+      "בריאות": "2/3",
+      "נסיעות": "0/2"
+    },
+    "by_question_type": {
+      "yes_no_policy": "0/12",
+      "factual_lookup": "3/8"
+    }
   }
 ]

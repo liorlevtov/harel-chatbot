@@ -77,7 +77,6 @@ def process_file(
         "output_filepath": str(output_path),
     }
 
-    # Skip if output already exists
     if skip_existing and output_path.exists():
         result["status"] = "success"
         result["skipped"] = True
