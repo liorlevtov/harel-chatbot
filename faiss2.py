@@ -361,12 +361,21 @@ def validate_answer(question: str, context: str, answer: str) -> dict:
 
 def answer_question(question: str) -> str:
     """Full pipeline: table lookup → rewrite → retrieve (hybrid) → generate → judge → refine/reject."""
+    result = answer_question_with_sources(question)
+    return result["answer"]
+
+
+def answer_question_with_sources(question: str) -> dict:
+    """Full pipeline returning {"answer": str, "sources": list[dict]}.
+
+    Each source dict has keys: filepath, start_index.
+    """
     # 0. Structured table lookup (fast exact answer for prices / numeric thresholds)
     if _table_store is not None:
         table_answer = _table_store.lookup(_client, question, LLM_MODEL)
         if table_answer:
             print("  [table] answered from structured store")
-            return table_answer
+            return {"answer": table_answer, "sources": []}
 
     # 1. Query rewriting — generate alternative phrasings
     queries = rewrite_query(question)
@@ -379,7 +388,7 @@ def answer_question(question: str) -> str:
         for doc in docs
     )
 
-    # 2. Generate initial answer
+    # 3. Generate initial answer
     resp = _client.chat.completions.create(
         model=LLM_MODEL,
         messages=[
@@ -390,19 +399,30 @@ def answer_question(question: str) -> str:
     )
     draft = resp.choices[0].message.content.strip()
 
-    # 3. Judge
+    # 4. Judge
     judgment = validate_answer(question, context, draft)
     verdict = judgment.get("verdict", "approved")
 
     print(f"  [judge] verdict={verdict} | {judgment.get('critique', '')}")
 
     if verdict in ("hallucinated", "no_context"):
-        return "אין לי מספיק מידע כדי לענות על שאלה זו."
+        answer = "אין לי מספיק מידע כדי לענות על שאלה זו."
     elif verdict == "incomplete":
         refined = judgment.get("refined_answer")
-        return refined if refined else draft
+        answer = refined if refined else draft
     else:
-        return draft
+        answer = draft
+
+    # Build sources list from retrieved docs
+    sources = [
+        {
+            "filepath": doc.metadata.get("source", ""),
+            "start_index": doc.metadata.get("start_index", 0),
+        }
+        for doc in docs
+    ]
+
+    return {"answer": answer, "sources": sources}
 
 
 def run_agent():
