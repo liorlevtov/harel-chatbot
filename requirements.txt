@@ -24,6 +24,7 @@ lxml>=5.0.0
 
 # Document processing
 docling>=1.0.0
+langchain-docling>=0.1.0
 
 # Vector database (Milvus)
 pymilvus>=2.4.0

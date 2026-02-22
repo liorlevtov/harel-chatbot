@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Dict, List, Literal, Optional
 
-import faiss2 as rag
+import faiss3 as rag
 
 BASE_DIR = Path(__file__).parent
 
@@ -39,30 +39,33 @@ def _load_manifest():
 
 
 def _resolve_sources(raw_sources: list) -> List["Source"]:
-    """Convert raw source dicts from faiss2 into Source objects with URLs."""
+    """Convert raw source dicts from faiss3 into Source objects with URLs."""
     seen = set()
     sources = []
     for src in raw_sources:
-        filepath = src.get("filepath", "")
-        # Normalize: FAISS metadata stores absolute paths, manifest uses relative
-        # Strip the project root prefix to get relative path
-        rel_path = filepath
-        project_root = str(BASE_DIR)
-        if rel_path.startswith(project_root):
-            rel_path = rel_path[len(project_root):].lstrip("/")
-
-        url = _filepath_to_url.get(rel_path, "")
+        # v3 sources carry "url" directly from manifest
+        url = src.get("url", "")
         if not url:
-            # Try matching by filename (last component) as fallback
-            filename = Path(rel_path).stem  # e.g. "xxx_hash"
-            for manifest_path, manifest_url in _filepath_to_url.items():
-                if Path(manifest_path).stem == filename:
-                    url = manifest_url
-                    break
+            # Fallback: look up from manifest by filepath
+            filepath = src.get("filepath", "")
+            rel_path = filepath
+            project_root = str(BASE_DIR)
+            if rel_path.startswith(project_root):
+                rel_path = rel_path[len(project_root):].lstrip("/")
+            url = _filepath_to_url.get(rel_path, "")
+            if not url:
+                filename = Path(rel_path).stem
+                for manifest_path, manifest_url in _filepath_to_url.items():
+                    if Path(manifest_path).stem == filename:
+                        url = manifest_url
+                        break
+
+        page = src.get("page_number", 0)
+
         if not url or url in seen:
             continue
         seen.add(url)
-        sources.append(Source(link=url, page=src.get("start_index") or 0))
+        sources.append(Source(link=url, page=page))
     return sources
 
 
